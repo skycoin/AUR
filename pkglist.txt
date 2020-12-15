@@ -1,0 +1,15 @@
+cx
+cx-bin
+cx-latest
+cxo
+skycoin
+skycoin-bin
+skycoin-latest
+skycoin-explorer
+skycoin-font
+skycoin-hardware-wallet-daemon
+skycoin-hardware-wallet-go
+skycoin-keyring
+skyimager
+skywire
+skywire-bin
