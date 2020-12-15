@@ -1,0 +1,31 @@
+pkgbase = cx
+	pkgdesc = CX Blockchain Programming Language. skycoin.com/cx
+	pkgver = 0.7.1
+	pkgrel = 4
+	url = https://github.com/skycoin/cx
+	arch = any
+	makedepends = git
+	makedepends = go
+	makedepends = gcc
+	makedepends = glade
+	makedepends = xorg-server-xvfb
+	makedepends = libxinerama
+	makedepends = libxcursor
+	makedepends = libxrandr
+	makedepends = libglvnd
+	makedepends = libglade
+	makedepends = mesa
+	makedepends = libxi
+	makedepends = cairo
+	makedepends = perl
+	makedepends = pango
+	makedepends = goyacc
+	makedepends = musl
+	makedepends = kernel-headers-musl
+	source = https://github.com/skycoin/cx/archive/v0.7.1.tar.gz
+	sha256sums = 1deb342041cc365c92617e8cf6c24801ff3011f2df90a988b4541b5bc83be4fe
+
+pkgname = cx
+	options = !strip
+	options = staticlibs
+
