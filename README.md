@@ -5,7 +5,7 @@ Skycoin in the Arch User Repos
 
 ## Package Maintenance
 
-This repository allows PKGBUILDs to be maintained in the [AUR](https://aur.archlinux.org) for corresponding [Skycoin]{https://github.com/skycoin} github repos.
+This repository allows PKGBUILDs to be maintained in the [AUR](https://aur.archlinux.org) for corresponding [Skycoin](https://github.com/skycoin) github repos.
 
 The old method of managing AUR packages
 ```
