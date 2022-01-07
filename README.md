@@ -3,6 +3,7 @@ Skycoin in the Arch User Repos
 
 (Now with git subtree!)
 thanks to @yuvadm for the pkg.sh script!!
+^^ Needs refinement to work more easily
 
 ## Package Maintenance
 
@@ -157,26 +158,38 @@ The package was built and installed according to the functions defined in the PK
 * **Do not ever use inbuilt skywire updater with a package**
 * Scripts are provided to enhance user experience and provide automation
 
-###  Naming Conventions and build specifications
+###  Naming Conventions and build specifications / types
 
 * **Binaries are statically compiled with `musl` now by default**
 * `-bin` denotes a package which uses official release binaries.
-* `-latest` a package which is built to the latest working commits in the specified branch
-* without either of these suffix, a package is built either from the source archive of the latest release or from the specified branch
+* without suffix, a package is built either from the source archive of the latest release or from the default branch if no source archive exists
+
+Within the cloned AUR repository, a few variations of the PKGBUILD are sometimes included
+
+* `deb.PKGBUILD` build debian package
+* `cc.deb.PKGBUILD` build debian packages for all architectures
+* `git.PKGBUILD` build using cloned .git sources
 
 ## Skywire packaging overview
 
-The goal of the skywire package is to have only one command between the running system without skywire and the running instance of skywire. Even without the existance of a hosted release package. The build / install is handled by `yay` and the configuration is defined in the `skywire-autoconfig` script which is called by the .install script at the point of installation.
+The goal of the skywire AUR package is to have only one command between the running system without skywire and the running instance of skywire. Even without the existance of a hosted release package. The build / install is handled by `yay` and the configuration is defined in the `skywire-autoconfig` script which is called by the .install script at the point of installation.
 
 ## deb.PKGBUILDS
 
-Recently I began testing creating .deb packages with `makepkg`. This has seen success but is only currently implemented for skywire.
+Debian packages can now be natively created with archlinux packaging tools.
 
-## Satellite packages
+A typical example of building a debian package on archlinux
 
-PKGBUILDs which are provided by the skywire package. There are currenty two-
+Fiirst, install the package with `yay` to the archlinux host system
+```
+yay -S skywire-bin
+```
 
-* `skywire-save` backs up or persists the skywire configuration files. It is not intended as a distributable package
-* `hypervisorkey` which is for distributing the key of the hypervisor to other visors
+switch to the directory where the package was compiled in yay's cache and run makepkg on the deb.PKGBUILD
 
-The support scripts include a golang http server and repository creation functions, in order that the hypervisorkey package can be installed to any machine on the local network.
+```
+cd ~/.cache/yay/skywire-bin
+makepkg -p deb.PKGBUILD
+```
+The debian package is produced.
+
