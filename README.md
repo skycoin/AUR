@@ -1,17 +1,15 @@
 # AUR
+
 Skycoin in the Arch User Repos
 
-(Now with git subtree!)
-thanks to @yuvadm for the pkg.sh script!!
-^^ Needs refinement to work more easily
 
 ## Package Maintenance
 
 This repository allows PKGBUILDs to be maintained in the [AUR](https://aur.archlinux.org) for corresponding [Skycoin]{https://github.com/skycoin} github repos.
 
-The old method of managing AUR packages; with $pkgname being a variable containing the name of any package:
+The old method of managing AUR packages
 ```
-git clone ssh://aur@aur.archlinux.org/$pkgname.git
+git clone ssh://aur@aur.archlinux.org/$PACKAGE.git
 updpkgsums
 makepkg --printsrcinfo > .SRCINFO;
 git add -f PKGBUILD .SRCINFO
@@ -19,20 +17,25 @@ git commit -m "commit message"
 git push
 ```
 
-with `pkg.sh` and a containing repository this becomes
+with `aurpublish` and a containing github repository this becomes
 
 ```
-# initial setup step
-./pkg.sh import $(cat pkglist.txt)
+# initial setup step, pull package from AUR
+aurpublish -p $PACKAGE
 #change some files
 updpkgsums
 makepkg --printsrcinfo > .SRCINFO;
 git add -f PKGBUILD .SRCINFO
 #add scripts, etc.
 git commit -m "commit message"
+#push to AUR
+aurpublish $PACKAGE
+#push to github
 git push
-./pkg.sh update $pkgname
+
 ```
+
+Needed dependencies for maintainers: pacman-contrib (updpkgsums) & aurpublish
 
 ## Testing builds
 
@@ -192,4 +195,3 @@ cd ~/.cache/yay/skywire-bin
 makepkg -p deb.PKGBUILD
 ```
 The debian package is produced.
-
