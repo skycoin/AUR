@@ -1,39 +1,37 @@
+ # Maintainer: Moses Narrow <moe_narrow@use.startmail.com>
+# Maintainer: Rudi [KittyCash] <rudi@skycoinmail.com>
 _projectname=skycoin
-pkgname=skywire
-_pkgname=${pkgname}
+pkgname=skywire-bin
+_pkgname=${pkgname/-bin/}
 _githuborg=${_projectname}
-pkgdesc="Skywire Mainnet Node implementation. Debian package; cross-compile."
+pkgdesc="Skywire Mainnet Node implementation; develop branch - Debian testing package."
 _pkggopath="github.com/${_githuborg}/${_pkgname}"
 pkgver='1.1.0'
 pkgrel=1
 #pkgrel=1
-_rc='-pr1'
-_pkgver="${pkgver}${_rc}"
-_tag_ver="v${_pkgver}"
+_pkgarch=$(dpkg --print-architecture)
+_pkgarches=('armhf' 'arm64' 'amd64' 'armel')
+_pkgver=${pkgver}
 _pkgrel=${pkgrel}
 arch=( 'i686' 'x86_64' 'aarch64' 'armv8' 'armv7' 'armv7l' 'armv7h' 'armv6h' 'armhf' 'armel' 'arm' )
 url="https://${_pkggopath}"
 license=()
-#set to native architecture with dpkg
-_pkgarch=$(dpkg --print-architecture)
-_pkgarches=('armhf' 'arm64' 'amd64')
-arch=('any')
-makedepends=('dpkg' 'git' 'go' 'musl' 'kernel-headers-musl' 'aarch64-linux-musl' 'arm-linux-gnueabihf-musl') # 'arm-linux-gnueabihf-binutils' 'aarch64-binutils') #'aarch64-linux-musl' 'arm-linux-gnueabihf-musl' 'skycoin-keyring')
+makedepends=('dpkg' 'git' 'go' 'musl' 'kernel-headers-musl' 'aarch64-linux-musl' 'arm-linux-gnueabihf-musl')
+depends=()
 _debdeps=""
 install=skywire.install
-_scripts="skywire-scripts"
-source=("${url}/archive/refs/tags/${_tag_ver}.tar.gz"
-"skywire-autoconfig::https://aur.archlinux.org/cgit/aur.git/plain/skywire-autoconfig?h=skywire-bin"
-"com.skywire.Skywire.desktop::https://aur.archlinux.org/cgit/aur.git/plain/com.skywire.Skywire.desktop?h=skywire-bin"
-"com.skywirevpn.SkywireVPN.desktop::https://aur.archlinux.org/cgit/aur.git/plain/com.skywirevpn.SkywireVPN.desktop?h=skywire-bin"
-"skywirevpn.png::https://aur.archlinux.org/cgit/aur.git/plain/skywirevpn.png?h=skywire-bin"
-"skywire.png::https://aur.archlinux.org/cgit/aur.git/plain/skywire.png?h=skywire-bin"
-"skywire.service::https://aur.archlinux.org/cgit/aur.git/plain/skywire.service?h=skywire-bin"
-"skywire-autoconfig.service::https://aur.archlinux.org/cgit/aur.git/plain/skywire-autoconfig.service?h=skywire-bin"
-"postinst.sh::https://aur.archlinux.org/cgit/aur.git/plain/postinst.sh?h=skywire-bin"
-"prerm.sh::https://aur.archlinux.org/cgit/aur.git/plain/prerm.sh?h=skywire-bin"
+source=("git+${url}.git#branch=develop"
+"skywire-autoconfig"
+"com.skywire.Skywire.desktop"
+"com.skywirevpn.SkywireVPN.desktop"
+"skywirevpn.png"
+"skywire.png"
+"skywire.service"
+"skywire-autoconfig.service"
+"postinst.sh"
+"prerm.sh"
 )
-sha256sums=('40b74f7251672e83f72fa0a3d359a9aae26e65c58fae538e1507bfd415b3970b'
+sha256sums=('SKIP'
             '57eeac39adb3d801ca0cac5c069fdc14add4e9c182569b58fcc4d41aac8efec4'
             'f0300bcde06b6818b637ccc23fa8206a40e67f63815781d265bd10d2cda93e65'
             'e6ea2c7471bcf5bc83e8fd831c047ba61b98eab58ca7c055475714dcf6066539'
@@ -43,28 +41,43 @@ sha256sums=('40b74f7251672e83f72fa0a3d359a9aae26e65c58fae538e1507bfd415b3970b'
             '55293e05c5d6c877397eb4c52123bb02e8bc92aeaf663ba70e1cfab318ce727c'
             '7b17a55e64d1371fecd24edc3da7c6a762cf2b3d058f6fc4a5dc7c5f9b4cff09'
             '233ccf0e87b37e782828f53960e05e478cf381f61bbfdb16a0cc0254ee8be7c2')
-#tar -czvf skywire-deb-scripts.tar.gz skywire-deb-scripts
-#updpkgsums deb.PKGBUILD
+
+pkgver() {
+_version=$(git ls-remote --tags --refs --sort="version:refname" ${url}.git | tail -n1)
+_version=${_version##*/}
+_version=${_version%%-*}
+_version=${_version//v/}
+echo ${_version}
+}
 
 prepare() {
 for _i in ${_pkgarches[@]}; do
 _msg2 "$_i"
 done
 # https://wiki.archlinux.org/index.php/Go_package_guidelines
-mkdir -p ${srcdir}/go/src/github.com/${_githuborg}/ ${srcdir}/go/bin.${_i} ${srcdir}/go/apps.${_i}
-ln -rTsf ${srcdir}/${pkgname}-${pkgver}${_rc} ${srcdir}/go/src/${_pkggopath}
+mkdir -p ${srcdir}/go/src/github.com/${_githuborg}/
+for _i in ${_pkgarches[@]}; do
+mkdir -p ${srcdir}/go/bin.${_i}
+mkdir -p ${srcdir}/go/apps.${_i}
+done
+ln -rTsf ${srcdir}/${_pkgname} ${srcdir}/go/src/${_pkggopath}
 cd ${srcdir}/go/src/${_pkggopath}/
 }
 
 build() {
-local GOPATH=${srcdir}/go
-export GOOS=linux
-export CGO_ENABLED=1
-
-for i in ${_pkgarches[@]}; do
-msg2 "_pkgarch=$i"
-local _pkgarch=$i
 export GOPATH=${srcdir}/go
+export GOOS=linux
+export CGO_ENABLED=1  #default anyways
+
+local _version="${pkgver}"
+DMSG_BASE="github.com/skycoin/dmsg"
+BUILDINFO_PATH="${DMSG_BASE}/buildinfo"
+BUILDINFO_VERSION="${BUILDINFO_PATH}.version=${_version}"
+BUILDINFO=${BUILDINFO_VERSION} ${BUILDINFO_DATE} ${BUILDINFO_COMMIT}
+#use musl-gcc for static compilation
+for _i in ${_pkgarches[@]}; do
+msg2 "_pkgarch=$_i"
+local _pkgarch=$_i
 export GOBIN=${GOPATH}/bin.${_pkgarch}
 export _GOAPPS=${GOPATH}/apps.${_pkgarch}
 export GOOS=linux
@@ -72,19 +85,39 @@ export GOOS=linux
 [[ $_pkgarch == "amd64" ]] && export GOARCH=amd64 && export CC=musl-gcc
 [[ $_pkgarch == "arm64" ]] && export GOARCH=arm64 && export CC=aarch64-linux-musl-gcc
 [[ $_pkgarch == "armhf" ]] && export GOARCH=arm && export GOARM=6 && export CC=arm-linux-gnueabihf-musl-gcc
+[[ $_pkgarch == "armel" ]] && export GOARCH=arm && export GOARM=5 && export CC=arm-linux-gnueabihf-musl-gcc
 #_ldflags=('-linkmode external -extldflags "-static" -buildid=')
+#create the skywire binaries
+
+
 #create the skywire binaries
 cd ${srcdir}/go/src/${_pkggopath}
 _cmddir=${srcdir}/go/src/${_pkggopath}/cmd
 
-_buildbins skychat $_GOAPPS apps/
-_buildbins skysocks $_GOAPPS apps/
-_buildbins skysocks-client $_GOAPPS apps/
-_buildbins vpn-client $_GOAPPS apps/
-_buildbins vpn-server $_GOAPPS apps/
-_buildbins skywire-visor $GOBIN
-_buildbins skywire-cli $GOBIN
-_buildbins setup-node $GOBIN
+_msg2 "building skychat binary"
+cd ${_cmddir}/apps/skychat
+go build -trimpath --ldflags="" --ldflags "${BUILDINFO} -s -w -linkmode external -extldflags '-static' -buildid=" -o $_GOAPPS .
+_msg2 "building skysocks binary"
+cd ${_cmddir}/apps/skysocks
+go build -trimpath --ldflags="" --ldflags "${BUILDINFO} -s -w -linkmode external -extldflags '-static' -buildid=" -o $_GOAPPS .
+_msg2 "building skysocks-client binary"
+cd ${_cmddir}/apps/skysocks-client
+go build -trimpath --ldflags="" --ldflags "${BUILDINFO} -s -w -linkmode external -extldflags '-static' -buildid=" -o $_GOAPPS .
+_msg2 "building vpn-client binary"
+cd ${_cmddir}/apps/vpn-client
+go build -trimpath --ldflags="" --ldflags "${BUILDINFO} -s -w -linkmode external -extldflags '-static' -buildid=" -o $_GOAPPS .
+_msg2 "building vpn-server binary"
+cd ${_cmddir}/apps/vpn-server
+go build -trimpath --ldflags="" --ldflags "${BUILDINFO} -s -w -linkmode external -extldflags '-static' -buildid=" -o $_GOAPPS .
+_msg2 "building skywire-cli binary"
+cd ${_cmddir}/skywire-cli
+go build -trimpath --ldflags="" --ldflags "${BUILDINFO} -s -w -linkmode external -extldflags '-static' -buildid=" -o $GOBIN .
+_msg2 "building skywire-visor binary"
+cd ${_cmddir}/skywire-visor
+go build -trimpath --ldflags="" --ldflags "${BUILDINFO} -s -w -linkmode external -extldflags '-static' -buildid=" -o $GOBIN .
+_msg2 "building setup-node binary"
+cd ${_cmddir}/setup-node
+go build -trimpath --ldflags="" --ldflags "${BUILDINFO} -s -w -linkmode external -extldflags '-static' -buildid=" -o $GOBIN .
 
 #binary transparency
 cd $GOBIN
@@ -96,8 +129,9 @@ sha256sum $(ls)
 
 _msg2 'creating the DEBIAN/control files'
 #create control file for the debian package
-echo "Package: skywire" > ${srcdir}/${_pkgarch}.control
-echo "Version: ${pkgver}-${pkgrel}" >> ${srcdir}/${_pkgarch}.control
+#this is not actually a binary release but is used for pre-release testing, so must have the same name
+echo "Package: skywire-bin" > ${srcdir}/${_pkgarch}.control
+echo "Version: ${_pkgver}-${_pkgrel}" >> ${srcdir}/${_pkgarch}.control
 echo "Priority: optional" >> ${srcdir}/${_pkgarch}.control
 echo "Section: web" >> ${srcdir}/${_pkgarch}.control
 echo "Architecture: ${_pkgarch}" >> ${srcdir}/${_pkgarch}.control
@@ -107,32 +141,22 @@ echo "Description: ${pkgdesc}" >> ${srcdir}/${_pkgarch}.control
  done
 }
 
-_buildbins() {
-_GOHERE=$2  #target bin dir
-_binpath=$3   #find the binary here- expecting 'apps/' or empty
-_binname=$1 #which binary to build
-_msg2 "building ${_binname} binary"
-cd ${_cmddir}/${_binpath}${_binname}
-go build -trimpath --ldflags '-s -w -linkmode external -extldflags "-static" -buildid=' -o ${_GOHERE}/${_binname} .
-}
-
-
 package() {
-for i in ${_pkgarches[@]}; do
-msg2 "_pkgarch=${i}"
-local _pkgarch=${i}
+for _i in ${_pkgarches[@]}; do
+msg2 "_pkgarch=${_i}"
+local _pkgarch=${_i}
 GOPATH=${srcdir}/go
 GOBIN=${GOPATH}/bin.${_pkgarch}
 _GOAPPS=${GOPATH}/apps.${_pkgarch}
 _msg2 'creating dirs'
 #set up to create a .deb package
-_debpkgdir="${_pkgname}-${_pkgver}-${_pkgrel}-${_pkgarch}"
+_debpkgdir="${_pkgname}-${pkgver}-${_pkgrel}-${_pkgarch}"
 _pkgdir="${pkgdir}/${_debpkgdir}"
 _skydir="opt/skywire"
 _skyapps="${_skydir}/apps"
-_skybin="${_skydir}/bin"
 _skyscripts="${_skydir}/scripts"
 _systemddir="etc/systemd/system"
+_skybin="${_skydir}/bin"
 [[ -d ${_pkgdir} ]] && rm -rf ${_pkgdir}
 mkdir -p ${_pkgdir}/usr/bin
 mkdir -p ${_pkgdir}/${_skydir}/bin
@@ -144,14 +168,15 @@ mkdir -p ${_pkgdir}/${_systemddir}
 cd $_pkgdir
 _msg2 'installing binaries'
  install -Dm755 ${GOBIN}/* ${_pkgdir}/${_skybin}/
-for _i in ${_pkgdir}/${_skybin}/* ; do
-ln -rTsf ${_i} ${_pkgdir}/usr/bin/${_i##*/}
+for _j in ${_pkgdir}/${_skybin}/* ; do
+	ln -rTsf ${_j} ${_pkgdir}/usr/bin/${_j##*/}
 done
 
 _msg2 'installing app binaries'
+_apps=${pkgdir}/test/apps
 install -Dm755 ${_GOAPPS}/* ${_pkgdir}/${_skyapps}/
-for _i in ${_pkgdir}/${_skyapps}/* ; do
-ln -rTsf ${_i} ${_pkgdir}/usr/bin/${_i##*/}
+for _j in ${_pkgdir}/${_skyapps}/* ; do
+	ln -rTsf ${_j} ${_pkgdir}/usr/bin/${_j##*/}
 done
 
 _msg2 'Installing scripts'
@@ -165,7 +190,7 @@ ln -rTsf ${_pkgdir}/${_skybin}/${_pkgname}-visor ${_pkgdir}/usr/bin/${_pkgname}
 chmod +x ${_pkgdir}/usr/bin/*
 
 _msg2 'installing dmsghttp-config.json'
-install -Dm644 ${srcdir}/${_pkgname}*/dmsghttp-config.json ${_pkgdir}/${_skydir}/dmsghttp-config.json
+install -Dm644 ${srcdir}/${_pkgname}/dmsghttp-config.json ${_pkgdir}/${_skydir}/dmsghttp-config.json
 
 #install systemd services
 _msg2 'Installing systemd services'
@@ -184,7 +209,7 @@ install -Dm755 ${srcdir}/prerm.sh ${_pkgdir}/DEBIAN/prerm
 #install -Dm755 ${srcdir}/${_scripts}/postrm.sh ${_pkgdir}/DEBIAN/postrm
 
 _msg2 'creating the debian package'
-#create the debian package!
+#create the debian package
 cd $pkgdir
 dpkg-deb --build -z9 ${_debpkgdir}
 mv *.deb ../../
@@ -193,18 +218,10 @@ done
 exit
 }
 
-_install2() {
-_binname="${1##*/}"
-_binname="${_binname%%.*}"
-install -Dm755 ${1} ${_pkgdir}/${2}/${_binname}
-ln -rTsf ${_pkgdir}/${2}/${_binname} ${_pkgdir}/usr/bin/${_binname}
-chmod +x ${_pkgdir}/usr/bin/${_binname}
-}
-
 _msg2() {
-	(( QUIET )) && return
-	local mesg=$1; shift
-	printf "${BLUE}  ->${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@"
+(( QUIET )) && return
+local mesg=$1; shift
+printf "${BLUE}  ->${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@"
 }
 
 _msg3() {
