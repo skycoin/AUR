@@ -197,8 +197,7 @@ _msg2 "Visor Public Key:
 ${_green}${_pubkey}${_nc}"
 if [[ $_is_hypervisor == "-i" ]]; then
 	if [[ $(ps -o comm= -p $PPID) != "sshd" ]]; then
-		_msg2 "Starting now on:
-${_red}http://127.0.0.1:8000${_nc}"
+		_msg2 "Starting now on:\n${_red}http://127.0.0.1:8000${_nc}"
 		_vpnurl=$(skywire-cli vpn url -p)
 		_msg2 "Use the vpn:
 ${_red}${_vpnurl}${_nc}"
