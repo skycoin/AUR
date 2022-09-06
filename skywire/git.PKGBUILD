@@ -13,8 +13,7 @@ url="https://${_pkggopath}"
 license=('license-free')
 makedepends=('git' 'go' 'musl' 'kernel-headers-musl')
 install=skywire.install
-source=("git+${url}.git#branch=develop"
-"skywire-autoconfig::https://aur.archlinux.org/cgit/aur.git/plain/skywire-autoconfig?h=skywire-bin"
+source=("skywire-autoconfig::https://aur.archlinux.org/cgit/aur.git/plain/skywire-autoconfig?h=skywire-bin"
 "com.skywire.Skywire.desktop::https://aur.archlinux.org/cgit/aur.git/plain/com.skywire.Skywire.desktop?h=skywire-bin"
 "com.skywirevpn.SkywireVPN.desktop::https://aur.archlinux.org/cgit/aur.git/plain/com.skywirevpn.SkywireVPN.desktop?h=skywire-bin"
 "skywirevpn.png::https://aur.archlinux.org/cgit/aur.git/plain/skywirevpn.png?h=skywire-bin"
@@ -22,8 +21,7 @@ source=("git+${url}.git#branch=develop"
 "skywire.service::https://aur.archlinux.org/cgit/aur.git/plain/skywire.service?h=skywire-bin"
 "skywire-autoconfig.service::https://aur.archlinux.org/cgit/aur.git/plain/skywire-autoconfig.service?h=skywire-bin"
 )
-sha256sums=('SKIP'
-            '08f0c625a3ae8810f0468a45aa2e463425ec307441f71f6ba48114bda2055316'
+sha256sums=('08f0c625a3ae8810f0468a45aa2e463425ec307441f71f6ba48114bda2055316'
             'f0300bcde06b6818b637ccc23fa8206a40e67f63815781d265bd10d2cda93e65'
             '0c20dd44eca0266a3a10fab24c657295a833eba9f78c6b1cf06132b093ac3ba8'
             'ec24750a99f5cda8d8a8dc94743943218e1b2088c2b2c7dc1644ee78d954fe7e'
@@ -40,6 +38,7 @@ echo ${_version}
 }
 
 prepare() {
+rm -rf skywire && git clone --depth=1 ${url}.git --branch develop
 # https://wiki.archlinux.org/index.php/Go_package_guidelines
 mkdir -p ${srcdir}/go/src/github.com/${_githuborg}/ ${srcdir}/go/bin ${srcdir}/go/apps
 ln -rTsf ${srcdir}/${_pkgname} ${srcdir}/go/src/${_pkggopath}
