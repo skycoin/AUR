@@ -5,8 +5,8 @@ _pkgname=${pkgname}
 _githuborg=${FORK:-$_projectname}
 pkgdesc="Skywire node implementation + deployment services, service discovery, & dmsg utilities. Skycoin.com"
 _pkggopath=github.com/${_githuborg}/${_pkgname}
-pkgver='1.3.20'
-pkgrel='2'
+pkgver='1.3.21'
+pkgrel='1'
 _rc=''
 #_rc='-pr1'
 _pkgver="${pkgver}${_rc}"
@@ -26,7 +26,7 @@ source=("skywire-${_tag_ver}.tar.gz::${url}/archive/refs/tags/${_tag_ver}.tar.gz
 "${_source[@]}")
 #"https://raw.githubusercontent.com/skycoin/skywire/develop/dmsghttp-config.json"
 #"all_servers.json"::"https://dmsgd.skywire.skycoin.com/dmsg-discovery/all_servers")
-sha256sums=('62fe66fc9bea8208956682266e978d6060e196856b617f2af91132569e70aa49'
+sha256sums=('d5da5a758ff8f913d727dd8979568cdaa47bc56a6b204b604776ec492ef0276f'
             'SKIP')
 
 _binaryscript=("skywire-cli" "skywire-visor")
