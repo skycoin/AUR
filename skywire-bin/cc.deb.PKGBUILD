@@ -76,7 +76,7 @@ if [[ ${_pkgarch} == "armel" || ${_pkgarch} == "armhf" ]] ; then
   local _pkgarch1=arm
 fi
 
-local _binaryarchive="${_pkgname}-deployment-${_tag_ver}-linux-${_pkgarch1}.tar.gz"
+local _binaryarchive="${_pkgname}-${_tag_ver}-linux-${_pkgarch1}.tar.gz"
 [[ -f "${srcdir}/${_pkgname}" ]] && rm -rf "${srcdir}/${_pkgname}" || true
 #[[ -d "${srcdir}/apps" ]] && rm -rf "${srcdir}/apps" || true
 [[ -d "${pkgdir}/test" ]] && rm -rf "${pkgdir}/test" || true
