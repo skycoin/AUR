@@ -10,7 +10,7 @@ _rc=''
 _pkgver="${pkgver}${_rc}"
 _tag_ver="v${_pkgver}"
 _pkggopath="github.com/${_githuborg}/${_pkgname}"
-arch=( 'i686' 'x86_64' 'aarch64' 'armv8' 'armv7' 'armv7l' 'armv7h' 'armv6h' 'armhf' 'armel' 'arm' 'riscv64' )
+arch=( 'i686' 'x86_64' 'aarch64' 'armv8' 'armv7' 'armv7l' 'armv7h' 'armv6h' 'armhf' 'armel' 'arm' ) # 'riscv64' )
 url="https://${_pkggopath}"
 provides=( 'skywire' )
 conflicts=( 'skywire' )
@@ -48,16 +48,16 @@ sha256sums=('9257dc9cf98b382049b500f646c0005950077cedb83abbb62984983e4dda0874'
             '45ed6049df988f042c9a0352d33fef88fc9018398d09252aa4698948ce783c11'
             'b3a9a422e146fa0583482dc83a0f4e9ae25995ea1cc4fdfebc14c80dc1c596a5'
             '763c5a4251e819b944cfefeafa56e3d2bdfdd2e7e1198fdf1d369f3143990b5a'
-            'd1bbd2b6d141cee8499fe2ae0c8429325d2d80ea895cce3db2db11f0629cc740'
+            'b802e8a9f07b5f4cb443a6d218f5a3fa7411cba7a9d41b7c431052b32c84bf67'
             'e3a1a975138e6778a1e3ea47e98da94088c7c2d945295cd4ccbd0c992d6346c6')
-sha256sums_x86_64=('2092e90645cdbef4ba0650dc23f7ebcba55d177125b0e48698ad1f70e2f2597e')
-sha256sums_aarch64=('57e204fdb21d7d10ba25f580e4278d3c917c4245ab2d7cba1c9d34e649fff9e3')
-sha256sums_armv8=('57e204fdb21d7d10ba25f580e4278d3c917c4245ab2d7cba1c9d34e649fff9e3')
-sha256sums_armv7=('a5e1ca535202e16b869401627bee3093d9ef6863d45de8c791b68bd16cd509e4')
-sha256sums_armv7l=('a5e1ca535202e16b869401627bee3093d9ef6863d45de8c791b68bd16cd509e4')
-sha256sums_armv7h=('a5e1ca535202e16b869401627bee3093d9ef6863d45de8c791b68bd16cd509e4')
-sha256sums_arm=('92d65658629ac357495ac74ba1fe83f8deda79dba056fa901cc83bb43b4ed2df')
-sha256sums_riscv64=('22b012b28a3a7f9dd8f79303eaea29fda0b132d6aec49a7eb4c28d0c8fbf560b')
+sha256sums_x86_64=('730bd57bd80eeb1c45ca46d5b809cf37352baf36d1f9baa2833f6869b14a8b04')
+sha256sums_aarch64=('99c20ce4f8b21bba1fe6df73c6fe5d9d20d6baffc35a4621cf402e68752ba05d')
+sha256sums_armv8=('99c20ce4f8b21bba1fe6df73c6fe5d9d20d6baffc35a4621cf402e68752ba05d')
+sha256sums_armv7=('e8123552973d6ebb93931718b1a1b45bf260e0b2ece88458bd1673679ae5254e')
+sha256sums_armv7l=('e8123552973d6ebb93931718b1a1b45bf260e0b2ece88458bd1673679ae5254e')
+sha256sums_armv7h=('e8123552973d6ebb93931718b1a1b45bf260e0b2ece88458bd1673679ae5254e')
+sha256sums_arm=('775b1cd80f4a933345ac06726dd98735993f03314dfffc27440066427a7448b9')
+#sha256sums_riscv64=('22b012b28a3a7f9dd8f79303eaea29fda0b132d6aec49a7eb4c28d0c8fbf560b')
 #https://github.com/skycoin/skywire/releases/download/v1.3.17/skywire-v1.3.17-linux-amd64.tar.gz
 #https://github.com/skycoin/skywire/releases/download/v1.3.17/skywire-v1.3.17-linux-arm64.tar.gz
 #https://github.com/skycoin/skywire/releases/download/v1.3.17/skywire-v1.3.17-linux-armhf.tar.gz
@@ -72,7 +72,7 @@ source_arm=("${_release_url}-arm.tar.gz")
 source_armv7=("${_release_url}-armhf.tar.gz")
 source_armv7l=( "${source_armv7[@]}" )
 source_armv7h=( "${source_armv7[@]}" )
-source_riscv64=( "${_release_url}-riscv64.tar.gz" )
+#source_riscv64=( "${_release_url}-riscv64.tar.gz" )
 
 _binaryscript=("skywire-cli" "skywire-visor")
 _appscript=("skychat" "skysocks" "skysocks-client" "vpn-client" "vpn-server")
