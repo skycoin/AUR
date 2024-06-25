@@ -30,7 +30,11 @@ echo "setting pkgver=$_version, pkgrel=${_prelnew} for PKGBUILD"
 sed -i "s/^pkgver=.*/pkgver='${_version}'/" PKGBUILD && sed -i "s/^_rc=.*/_rc='${_vrc}'/" PKGBUILD && sed -i "s/^pkgrel=.*/pkgrel='${_prelnew}'/" PKGBUILD
 echo "updating checksums for PKGBUILD(s)"
 updpkgsums
-ls *PKGBUILD | parallel updpkgsums {}
+#ls *PKGBUILD | parallel updpkgsums {}
+updpkgsums cc.deb.PKGBUILD
+updpkgsums deb.PKGBUILD
+updpkgsums dev.PKGBUILD
+updpkgsums git.PKGBUILD
 echo "creating .SRCINFO"
 echo "makepkg --printsrcinfo > .SRCINFO"
 makepkg --printsrcinfo > .SRCINFO
