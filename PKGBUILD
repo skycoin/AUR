@@ -4,7 +4,7 @@ _pkgname=${pkgname/-bin/}
 _githuborg=skycoin
 pkgdesc="Skywire: Building a new Internet. Skycoin.com"
 pkgver='1.3.23'
-pkgrel='4'
+pkgrel='5'
 _rc=''
 #_rc='-pr1'
 _pkgver="${pkgver}${_rc}"
@@ -50,13 +50,13 @@ sha256sums=('9257dc9cf98b382049b500f646c0005950077cedb83abbb62984983e4dda0874'
             '763c5a4251e819b944cfefeafa56e3d2bdfdd2e7e1198fdf1d369f3143990b5a'
             '0dbdf7a39d8ec4e80e188f7ba608f3cfbed03567808ad4dc60e624f25ba847bb'
             'e3a1a975138e6778a1e3ea47e98da94088c7c2d945295cd4ccbd0c992d6346c6')
-sha256sums_x86_64=('730bd57bd80eeb1c45ca46d5b809cf37352baf36d1f9baa2833f6869b14a8b04')
-sha256sums_aarch64=('99c20ce4f8b21bba1fe6df73c6fe5d9d20d6baffc35a4621cf402e68752ba05d')
-sha256sums_armv8=('99c20ce4f8b21bba1fe6df73c6fe5d9d20d6baffc35a4621cf402e68752ba05d')
-sha256sums_armv7=('e8123552973d6ebb93931718b1a1b45bf260e0b2ece88458bd1673679ae5254e')
-sha256sums_armv7l=('e8123552973d6ebb93931718b1a1b45bf260e0b2ece88458bd1673679ae5254e')
-sha256sums_armv7h=('e8123552973d6ebb93931718b1a1b45bf260e0b2ece88458bd1673679ae5254e')
-sha256sums_arm=('775b1cd80f4a933345ac06726dd98735993f03314dfffc27440066427a7448b9')
+sha256sums_x86_64=('e57d40832795dd315808953de6d2cb1eb9165619347d298d60df0a594f0f9a30')
+sha256sums_aarch64=('7ce747c55455a1ce2af67513b257d5939113daa74d67918906332f00c2d69370')
+sha256sums_armv8=('7ce747c55455a1ce2af67513b257d5939113daa74d67918906332f00c2d69370')
+sha256sums_armv7=('d7caeafb672f74c250adb52c264f7287a6faf75ddd7dc79c03c2557c2cd42f86')
+sha256sums_armv7l=('d7caeafb672f74c250adb52c264f7287a6faf75ddd7dc79c03c2557c2cd42f86')
+sha256sums_armv7h=('d7caeafb672f74c250adb52c264f7287a6faf75ddd7dc79c03c2557c2cd42f86')
+sha256sums_arm=('7060b4eac7df192890500480f1f55a7dba5c8d4eba2c8dd9c3cf4aef1fa881e2')
 #sha256sums_riscv64=('22b012b28a3a7f9dd8f79303eaea29fda0b132d6aec49a7eb4c28d0c8fbf560b')
 #https://github.com/skycoin/skywire/releases/download/v1.3.17/skywire-v1.3.17-linux-amd64.tar.gz
 #https://github.com/skycoin/skywire/releases/download/v1.3.17/skywire-v1.3.17-linux-arm64.tar.gz
