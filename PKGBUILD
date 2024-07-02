@@ -4,7 +4,7 @@ _pkgname=${pkgname/-bin/}
 _githuborg=skycoin
 pkgdesc="Skywire: Building a new Internet. Skycoin.com"
 pkgver='1.3.23'
-pkgrel='5'
+pkgrel='6'
 _rc=''
 #_rc='-pr1'
 _pkgver="${pkgver}${_rc}"
@@ -28,9 +28,9 @@ _source=("${_script[@]}"
 "${_desktop[@]}"
 "${_icon[@]}"
 "${_service[@]}"
-"${_key[@]}"
-"https://raw.githubusercontent.com/skycoin/skywire/develop/dmsghttp-config.json"
-"https://raw.githubusercontent.com/skycoin/skywire/develop/services-config.json")
+"${_key[@]}")
+#"https://raw.githubusercontent.com/skycoin/skywire/develop/dmsghttp-config.json"
+#"https://raw.githubusercontent.com/skycoin/skywire/develop/services-config.json")
 #"all_servers.json"::"https://dmsgd.skywire.skycoin.com/dmsg-discovery/all_servers")
 
 source=("${_source[@]}")
@@ -47,22 +47,20 @@ sha256sums=('9257dc9cf98b382049b500f646c0005950077cedb83abbb62984983e4dda0874'
             'a2c457c8373c2c85df4110ec15080f802ba621ad53e69ad01b34a196bf08864b'
             '45ed6049df988f042c9a0352d33fef88fc9018398d09252aa4698948ce783c11'
             'b3a9a422e146fa0583482dc83a0f4e9ae25995ea1cc4fdfebc14c80dc1c596a5'
-            '763c5a4251e819b944cfefeafa56e3d2bdfdd2e7e1198fdf1d369f3143990b5a'
-            '0dbdf7a39d8ec4e80e188f7ba608f3cfbed03567808ad4dc60e624f25ba847bb'
-            '3bf9b17988987287ed57f00055df8d1e50ca7cc0273589413660c415d6e3d50d')
-sha256sums_x86_64=('80a6972db670fee66b4bb18155f1b50a1df5706b9b84f176aeb89be67c3c60c8')
-sha256sums_aarch64=('20c10c54c32153c7e9bd86ef8b3897696f6755270195781a3cd9bb4588bdca6c')
-sha256sums_armv8=('20c10c54c32153c7e9bd86ef8b3897696f6755270195781a3cd9bb4588bdca6c')
-sha256sums_armv7=('9246d508e032ade105e54f5c333780849debcdff64840e58196f61318818f2ab')
-sha256sums_armv7l=('9246d508e032ade105e54f5c333780849debcdff64840e58196f61318818f2ab')
-sha256sums_armv7h=('9246d508e032ade105e54f5c333780849debcdff64840e58196f61318818f2ab')
-sha256sums_arm=('46e40942fb7e21bb5888d7e63748f6845d7e619b166bf31d71050dc02365ebd6')
+            '763c5a4251e819b944cfefeafa56e3d2bdfdd2e7e1198fdf1d369f3143990b5a')
+sha256sums_x86_64=('47b4ce4e1426c33e14cb68a42b36edf76f107cf64094ee6f84f8ccfd77efc763')
+sha256sums_aarch64=('167bbbf98bd5c5f4a73cf77cd744460efc7b3a544182414f24efffdd7ba9af1f')
+sha256sums_armv8=('167bbbf98bd5c5f4a73cf77cd744460efc7b3a544182414f24efffdd7ba9af1f')
+sha256sums_armv7=('8e99ad6b7c861c69bda4afc14057e27e676e8c29bfde37b402d8db370537bed9')
+sha256sums_armv7l=('8e99ad6b7c861c69bda4afc14057e27e676e8c29bfde37b402d8db370537bed9')
+sha256sums_armv7h=('8e99ad6b7c861c69bda4afc14057e27e676e8c29bfde37b402d8db370537bed9')
+sha256sums_arm=('07518dee8b3a6a7457617b188713a94b01802a3576139331b2f76fb624a1a3cd')
 #sha256sums_riscv64=('22b012b28a3a7f9dd8f79303eaea29fda0b132d6aec49a7eb4c28d0c8fbf560b')
-#https://github.com/skycoin/skywire/releases/download/v1.3.17/skywire-v1.3.17-linux-amd64.tar.gz
-#https://github.com/skycoin/skywire/releases/download/v1.3.17/skywire-v1.3.17-linux-arm64.tar.gz
-#https://github.com/skycoin/skywire/releases/download/v1.3.17/skywire-v1.3.17-linux-armhf.tar.gz
-#https://github.com/skycoin/skywire/releases/download/v1.3.17/skywire-v1.3.17-linux-arm.tar.gz
-#https://github.com/skycoin/skywire/releases/download/v1.3.17/skywire-v1.3.17-linux-riscv64.tar.gz
+#https://github.com/skycoin/skywire/releases/download/v1.3.23/skywire-v1.3.23-linux-amd64.tar.gz
+#https://github.com/skycoin/skywire/releases/download/v1.3.23/skywire-v1.3.23-linux-arm64.tar.gz
+#https://github.com/skycoin/skywire/releases/download/v1.3.23/skywire-v1.3.23-linux-armhf.tar.gz
+#https://github.com/skycoin/skywire/releases/download/v1.3.23/skywire-v1.3.23-linux-arm.tar.gz
+#https://github.com/skycoin/skywire/releases/download/v1.3.23/skywire-v1.3.23-linux-riscv64.tar.gz
 _binarchive=("${_pkgname}-${_tag_ver}-linux")
 _release_url=("${url}/releases/download/${_tag_ver}/${_binarchive}")
 source_x86_64=("${_release_url}-amd64.tar.gz")
