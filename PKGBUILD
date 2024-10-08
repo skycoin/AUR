@@ -5,7 +5,7 @@ _pkgname=${pkgname}
 _githuborg=${FORK:-$_projectname}
 pkgdesc="Skywire node implementation + deployment services, service discovery, & dmsg utilities. Skycoin.com"
 _pkggopath=github.com/${_githuborg}/${_pkgname}
-pkgver='1.3.27'
+pkgver='1.3.28'
 pkgrel='1'
 _rc=''
 #_rc='-pr1'
@@ -26,7 +26,7 @@ source=("skywire-${_tag_ver}.tar.gz::${url}/archive/refs/tags/${_tag_ver}.tar.gz
 "${_source[@]}")
 #"https://raw.githubusercontent.com/skycoin/skywire/develop/dmsghttp-config.json"
 #"all_servers.json"::"https://dmsgd.skywire.skycoin.com/dmsg-discovery/all_servers")
-sha256sums=('77516e24ccadc9385ce2c34b3a391a6615d8648ba63a792c8e0aa56f187cdd0f'
+sha256sums=('8454eead5021708a398d9bca81b8fbd45041c1369eb33fd4ec076c8ae4257f7e'
             'SKIP')
 
 _binaryscript=("skywire-cli" "skywire-visor")
@@ -68,7 +68,7 @@ cd "${srcdir}"/go/src/${_pkggopath} || exit
 _cmddir="${srcdir}"/go/src/${_pkggopath}/cmd
 #static compilation with 'musl' avoids glibc runtime deps which cause binary to fail if correct glibc / libc6 is not found on the system
 _msg2 "building skywire binary"
-go build -trimpath --ldflags="" --ldflags "${BUILDINFO} -s -w -linkmode external -extldflags '-static' -buildid=" -o $GOBIN/skywire "${_cmddir}"/skywire/...
+go build -trimpath --ldflags="" --ldflags "${BUILDINFO} -s -w -linkmode external -extldflags '-static' -buildid=" -o $GOBIN/skywire "${_cmddir}"/skywire/skywire.go
 _msg2 'creating launcher scripts'
 echo -e '#!/bin/bash\n/opt/skywire/bin/skywire cli $@' > "${GOBIN}/skywire-cli"
 echo -e '#!/bin/bash\n/opt/skywire/bin/skywire visor $@' > "${GOBIN}/skywire-visor"
@@ -124,6 +124,7 @@ for _i in "${_script[@]}" ; do
 done
 _msg2 'installing dmsghttp-config.json'
 install -Dm644 "${srcdir}/dmsghttp-config.json" "${_pkgdir}/${_dir}/dmsghttp-config.json" || install -Dm644 "${srcdir}/skywire/dmsghttp-config.json" "${_pkgdir}/${_dir}/dmsghttp-config.json" || install -Dm644 "${srcdir}/skywire-${_pkgver}/dmsghttp-config.json" "${_pkgdir}/${_dir}/dmsghttp-config.json"
+install -Dm644 "${srcdir}/services-config.json" "${_pkgdir}/${_dir}/services-config.json" || install -Dm644 "${srcdir}/skywire/services-config.json" "${_pkgdir}/${_dir}/services-config.json" || install -Dm644 "${srcdir}/skywire-${_pkgver}/services-config.json" "${_pkgdir}/${_dir}/services-config.json"
 #make sure the dmsghttp-config will get redownloaded on subsequent builds
 #[[ -f "${srcdir}/dmsghttp-config.json" ]] && rm "${srcdir}/dmsghttp-config.json"
 _msg2 'Installing systemd services'
