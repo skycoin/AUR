@@ -1,7 +1,7 @@
 pkgbase = skywire
-	pkgdesc = Skywire node implementation + deployment services, service discovery, & dmsg utilities. Skycoin.com
-	pkgver = 1.3.28
-	pkgrel = 1
+	pkgdesc = Software defined networking with public keys. Skycoin.com
+	pkgver = 1.3.29
+	pkgrel = 2
 	url = https://github.com/skycoin/skywire
 	install = skywire.install
 	arch = i686
@@ -18,12 +18,10 @@ pkgbase = skywire
 	arch = riscv64
 	license = license-free
 	makedepends = git
-	makedepends = go
+	makedepends = go>=1.24
 	makedepends = musl
 	makedepends = kernel-headers-musl
-	source = skywire-v1.3.28.tar.gz::https://github.com/skycoin/skywire/archive/refs/tags/v1.3.28.tar.gz
 	source = skywire-bin::git+https://aur.archlinux.org/skywire-bin
-	sha256sums = 8454eead5021708a398d9bca81b8fbd45041c1369eb33fd4ec076c8ae4257f7e
 	sha256sums = SKIP
 
 pkgname = skywire

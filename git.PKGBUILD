@@ -1,16 +1,15 @@
 source PKGBUILD
 
-pkgdesc="Skywire Mainnet Node implementation. Skycoin.com - develop branch"
+pkgdesc="Software defined networking with public keys. Skycoin.com"
 #build a branch with BRANCH=branch
 #build a fork with FORK=<github-username>
-source=("git+${url}.git#branch=${BRANCH:-develop}"
+source=(#"git+${url}.git#branch=${BRANCH:-develop}"
 "${_source[@]}"
 )
-sha256sums=('SKIP'
-            'SKIP')
+sha256sums=('SKIP')
 
 pkgver() {
-_version=$(git ls-remote --tags --refs --sort="version:refname" ${url}.git | tail -n1)
+_version=$(go list -mod=mod -m github.com/skycoin/skywire@develop | cut -d' ' -f2)
 _version=${_version##*/}
 _version=${_version%%-*}
 _version=${_version//v/}

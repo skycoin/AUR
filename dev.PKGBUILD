@@ -17,5 +17,4 @@ fi
 #exit so the arch package doesn't get built
 exit
 }
-sha256sums=('SKIP'
-            'SKIP')
+sha256sums=('SKIP')
