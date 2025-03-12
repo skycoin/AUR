@@ -1,5 +1,3 @@
- # Maintainer: Moses Narrow <moe_narrow@use.startmail.com>
-# Maintainer: Rudi [KittyCash] <rudi@skycoinmail.com>
 _projectname=skycoin
 pkgname=skywire-systray
 _pkgname=${pkgname/-systray/}
