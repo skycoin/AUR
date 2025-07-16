@@ -3,7 +3,7 @@ pkgname=skywire-bin
 _pkgname=${pkgname/-bin/}
 _githuborg=skycoin
 pkgdesc="Skywire: Building a new Internet. Skycoin.com"
-pkgver='1.3.28'
+pkgver='1.3.30'
 pkgrel='1'
 _rc=''
 #_rc='-pr1'
@@ -48,13 +48,13 @@ sha256sums=('9257dc9cf98b382049b500f646c0005950077cedb83abbb62984983e4dda0874'
             '45ed6049df988f042c9a0352d33fef88fc9018398d09252aa4698948ce783c11'
             'b3a9a422e146fa0583482dc83a0f4e9ae25995ea1cc4fdfebc14c80dc1c596a5'
             '763c5a4251e819b944cfefeafa56e3d2bdfdd2e7e1198fdf1d369f3143990b5a')
-sha256sums_x86_64=('82c5b5e2235dbe3a055c4733b2987103aaf9459cd8d673ebe35417f7cb183af7')
-sha256sums_aarch64=('95ad62ec8600eae303cc60f50582cd520e98c49e92172260c9d17d087549397c')
-sha256sums_armv8=('95ad62ec8600eae303cc60f50582cd520e98c49e92172260c9d17d087549397c')
-sha256sums_armv7=('855c188159add812801d53784fe92b4846a53a72b25a0f88a0b3483674091cd8')
-sha256sums_armv7l=('855c188159add812801d53784fe92b4846a53a72b25a0f88a0b3483674091cd8')
-sha256sums_armv7h=('855c188159add812801d53784fe92b4846a53a72b25a0f88a0b3483674091cd8')
-sha256sums_arm=('c8ba7d588b711099b7ffe48bc70eccf972e7a4f8cc7c97998741122f684b9c3f')
+sha256sums_x86_64=('1e168941a93f009ec1ec49501f9271e93d758dd34517575eff67eedc1636612e')
+sha256sums_aarch64=('7b28b8ca4c73b58cea0709db318b7e9c97bef60b4693225ad71ca3b3c88c7146')
+sha256sums_armv8=('7b28b8ca4c73b58cea0709db318b7e9c97bef60b4693225ad71ca3b3c88c7146')
+sha256sums_armv7=('02239594f3c28305b435746dc83d45fd4f84115412dae0ea64a7ce7a442809fb')
+sha256sums_armv7l=('02239594f3c28305b435746dc83d45fd4f84115412dae0ea64a7ce7a442809fb')
+sha256sums_armv7h=('02239594f3c28305b435746dc83d45fd4f84115412dae0ea64a7ce7a442809fb')
+sha256sums_arm=('94f43ac1a9e63fbc31739181fdfd60317bd31d1a24f3045fa5f90f471c5087b4')
 #sha256sums_riscv64=('22b012b28a3a7f9dd8f79303eaea29fda0b132d6aec49a7eb4c28d0c8fbf560b')
 #https://github.com/skycoin/skywire/releases/download/v1.3.23/skywire-v1.3.23-linux-amd64.tar.gz
 #https://github.com/skycoin/skywire/releases/download/v1.3.23/skywire-v1.3.23-linux-arm64.tar.gz
