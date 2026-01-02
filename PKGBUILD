@@ -4,7 +4,7 @@ _pkgname=${pkgname/-bin/}
 _githuborg=skycoin
 pkgdesc="Skywire: Building a new Internet. Skycoin.com"
 pkgver='1.3.32'
-pkgrel='1'
+pkgrel='2'
 _rc=''
 #_rc='-pr1'
 _pkgver="${pkgver}${_rc}"
@@ -56,13 +56,12 @@ sha256sums_armv7=('0d4838efb12e9d5c47aaf4c74cc51e7adb9cfbb8633274b21100174978b24
 sha256sums_armv7l=('0d4838efb12e9d5c47aaf4c74cc51e7adb9cfbb8633274b21100174978b24c02')
 sha256sums_armv7h=('0d4838efb12e9d5c47aaf4c74cc51e7adb9cfbb8633274b21100174978b24c02')
 sha256sums_arm=('f6c46091d40906277c61955999569807c65e2bbcf4fdbd7d91e088254fe850ee')
-#sha256sums_riscv64=('22b012b28a3a7f9dd8f79303eaea29fda0b132d6aec49a7eb4c28d0c8fbf560b')
-#https://github.com/skycoin/skywire/releases/download/v1.3.31/skywire-v1.3.31-linux-amd64.tar.gz
-#https://github.com/skycoin/skywire/releases/download/v1.3.31/skywire-v1.3.31-linux-arm64.tar.gz
-#https://github.com/skycoin/skywire/releases/download/v1.3.31/skywire-v1.3.31-linux-armhf.tar.gz
-#https://github.com/skycoin/skywire/releases/download/v1.3.31/skywire-v1.3.31-linux-arm.tar.gz
-#https://github.com/skycoin/skywire/releases/download/v1.3.31/skywire-v1.3.31-linux-riscv64.tar.gz
-#https://github.com/skycoin/skywire/releases/download/v1.3.31/skywire-v1.3.31-linux-386.tar.gz
+#https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-amd64.tar.gz
+#https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-arm64.tar.gz
+#https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-armhf.tar.gz
+#https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-arm.tar.gz
+#https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-riscv64.tar.gz
+#https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-386.tar.gz
 _binarchive=("${_pkgname}-${_tag_ver}-linux")
 _release_url=("${url}/releases/download/${_tag_ver}/${_binarchive}")
 source_x86_64=("${_release_url}-amd64.tar.gz")
@@ -73,7 +72,7 @@ source_arm=("${_release_url}-arm.tar.gz")
 source_armv7=("${_release_url}-armhf.tar.gz")
 source_armv7l=( "${source_armv7[@]}" )
 source_armv7h=( "${source_armv7[@]}" )
-#source_riscv64=( "${_release_url}-riscv64.tar.gz" )
+source_riscv64=( "${_release_url}-riscv64.tar.gz" )
 
 _binaryscript=("skywire-cli" "skywire-visor")
 _appscript=("skychat" "skysocks" "skysocks-client" "vpn-client" "vpn-server")
