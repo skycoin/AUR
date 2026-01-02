@@ -74,7 +74,10 @@ _msg2 "_pkgarch=${_i}"
 local _pkgarch="${_i}"
 local _pkgarch1="${_pkgarch}"
 if [[ ${_pkgarch} == "armel" || ${_pkgarch} == "armhf" ]] ; then
-  local _pkgarch1=arm
+  local _pkgarch1="arm"
+fi
+if [[ ${_pkgarch} == "i386" ]] ; then
+  local _pkgarch1="386"
 fi
 
 local _binaryarchive="${_pkgname}-${_tag_ver}-linux-${_pkgarch1}.tar.gz"
