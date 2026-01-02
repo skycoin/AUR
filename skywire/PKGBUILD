@@ -6,7 +6,7 @@ _githuborg=${FORK:-$_projectname}
 pkgdesc="Software defined networking with public keys. Skycoin.com"
 _pkggopath=github.com/${_githuborg}/${_pkgname}
 pkgver='1.3.32'
-pkgrel='1'
+pkgrel='2'
 _rc=''
 #_rc='-pr1'
 _pkgver="${pkgver}${_rc}"
@@ -22,8 +22,8 @@ _desktop=("skywire.desktop" "skywirevpn.desktop")
 _icon=("skywirevpn.png" "skywire.png")
 _service=("skywire.service" "skywire-autoconfig.service" "skywire-sn.service" "skywire-ar.service" "skywire-rf.service" "skywire-tpd.service" "skywire-dmsgd.service" "skywire-dmsg.service" "skywire-sd.service")
 _source=("skywire-bin::git+https://aur.archlinux.org/skywire-bin")
-source=(#"skywire-${_tag_ver}.tar.gz::${url}/archive/refs/tags/${_tag_ver}.tar.gz"
-"${_source[@]}")
+source=("${_source[@]}")
+#source=("skywire-${_tag_ver}.tar.gz::${url}/archive/refs/tags/${_tag_ver}.tar.gz")
 #"https://raw.githubusercontent.com/skycoin/skywire/develop/dmsghttp-config.json"
 #"all_servers.json"::"https://dmsgd.skywire.skycoin.com/dmsg-discovery/all_servers")
 sha256sums=('SKIP')
@@ -43,16 +43,14 @@ _build
 }
 #_build function - used in build variants
 _build() {
-  _msg2 "go install -trimpath --ldflags=\"\" --ldflags \" -s -w -linkmode external -extldflags '-static' -buildid=\" github.com/skycoin/skywire/cmd/skywire@develop"
-  ## Need to bump version for this to work
-#go install -trimpath --ldflags="" --ldflags " -s -w -linkmode external -extldflags '-static' -buildid=" github.com/skycoin/skywire/cmd/skywire@v${pkgver}
-go install -trimpath --ldflags="" --ldflags " -s -w -linkmode external -extldflags '-static' -buildid=" github.com/skycoin/skywire/cmd/skywire@develop
+_msg2 "go install -trimpath --ldflags=\"\" --ldflags \" -s -w -linkmode external -extldflags '-static' -buildid=\" github.com/skycoin/skywire/cmd/skywire@develop"
+go install -trimpath --ldflags="" --ldflags " -s -w -linkmode external -extldflags '-static' -buildid=" github.com/skycoin/skywire/cmd/skywire@v${pkgver}
 _msg2 'creating launcher scripts'
 echo -e '#!/bin/bash\n/opt/skywire/bin/skywire cli $@' > "${GOBIN}/skywire-cli"
 echo -e '#!/bin/bash\n/opt/skywire/bin/skywire visor $@' > "${GOBIN}/skywire-visor"
 #binary transparency
 cd "$GOBIN" || exit
-_msg2 'binary sha256sums'
+_msg2 'binary sha256sum'
 sha256sum skywire
 }
 
