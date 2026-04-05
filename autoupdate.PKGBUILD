@@ -1,10 +1,13 @@
 # Maintainer: Moses Narrow <moe_narrow@use.startmail.com>
+source PKGBUILD
+# Clear inherited arch-specific sources/checksums and build function
+unset source_x86_64 source_i686 source_aarch64 source_armv8 source_arm source_armv7 source_armv7l source_armv7h source_riscv64
+unset sha256sums_x86_64 sha256sums_i686 sha256sums_aarch64 sha256sums_armv8 sha256sums_arm sha256sums_armv7 sha256sums_armv7l sha256sums_armv7h
+unset backup _source _desktop _icon _service _script _binarchive _release_url _binaryscript _appscript
+build() { true; }
 pkgname=skywire-autoupdate
 pkgdesc="Skywire auto-updater: compiles latest CI-tested commit daily and updates docker deployments"
-pkgver='1.0.0'
-pkgrel='1'
 arch=('any')
-url="https://github.com/skycoin/skywire"
 depends=('skywire-bin' 'go>=1.21')
 optdepends=('docker: required for skywire-docker-update'
 'docker-compose: required for skywire-docker-update')
