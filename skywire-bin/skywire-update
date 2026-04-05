@@ -1,0 +1,79 @@
+#!/bin/bash
+# /usr/bin/skywire-update
+# Skywire auto-updater: builds as unprivileged user, installs as root
+set -e
+
+# Source configuration from /etc/skywire.conf if it exists
+SKYENV=${SKYENV:-/etc/skywire.conf}
+[[ -f "$SKYENV" ]] && source "$SKYENV"
+
+# UPDATE_CHANNEL controls what to install:
+#   "stable"        = latest CI-tested commit (default)
+#   "develop"       = latest develop branch commit
+#   "latest"        = latest tagged release version
+#   "<commit-hash>" = pin to a specific commit
+UPDATE_CHANNEL=${UPDATE_CHANNEL:-stable}
+
+BUILD_USER="skywire-build"
+BUILD_HOME="/var/lib/${BUILD_USER}"
+BUILD_GOPATH="${BUILD_HOME}/go"
+BUILD_GOCACHE="${BUILD_HOME}/.cache/go-build"
+
+# Ensure build user exists
+if ! id "$BUILD_USER" &>/dev/null; then
+    echo "Build user $BUILD_USER does not exist. Run: useradd -r -m -d $BUILD_HOME -s /usr/sbin/nologin $BUILD_USER"
+    exit 1
+fi
+
+# Resolve the target commit
+case "$UPDATE_CHANNEL" in
+  stable)
+    _tmpdir=$(mktemp -d)
+    chown "$BUILD_USER:" "$_tmpdir"
+    TARGET=$(runuser -u "$BUILD_USER" -- env GOPATH="$BUILD_GOPATH" GOCACHE="$_tmpdir" \
+        go run github.com/skycoin/skywire/cmd/skywire-commit@skywire-commit 2>/dev/null || echo "")
+    rm -rf "$_tmpdir"
+    if [ -z "$TARGET" ]; then
+        echo "Failed to fetch latest tested commit"
+        exit 1
+    fi
+    ;;
+  develop)
+    TARGET="develop"
+    ;;
+  latest)
+    TARGET="latest"
+    ;;
+  *)
+    TARGET="$UPDATE_CHANNEL"
+    ;;
+esac
+
+# Check if update is needed (skip for branch names)
+CURRENT=$(skywire -b 2>/dev/null | grep -oP 'v.*-\K[a-f0-9]+' || echo "none")
+SHORT=${TARGET:0:12}
+if [ "$SHORT" = "$CURRENT" ] && [ "$UPDATE_CHANNEL" != "develop" ] && [ "$UPDATE_CHANNEL" != "latest" ]; then
+    echo "Skywire is up to date at $SHORT"
+    exit 0
+fi
+
+echo "Updating skywire ($UPDATE_CHANNEL): $CURRENT -> $SHORT"
+
+# Build as unprivileged user
+runuser -u "$BUILD_USER" -- env \
+    GOPATH="$BUILD_GOPATH" \
+    GOCACHE="$BUILD_GOCACHE" \
+    GOFLAGS=-trimpath \
+    go install "github.com/skycoin/skywire@${TARGET}"
+
+# Install as root
+install -Dm755 "${BUILD_GOPATH}/bin/skywire" /opt/skywire/bin/skywire
+
+echo "Skywire updated to $SHORT"
+
+# Run autoconfig and restart if running via systemd
+if systemctl is-active --quiet skywire 2>/dev/null; then
+    echo "Running autoconfig and restarting skywire..."
+    systemctl start skywire-autoconfig 2>/dev/null || skywire cli config auto 2>/dev/null || true
+    systemctl restart skywire
+fi

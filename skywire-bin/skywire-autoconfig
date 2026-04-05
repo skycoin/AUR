@@ -131,9 +131,9 @@ _config_gen() {
 	[[ ! -z ${_1} ]] && { _retainhv="" ; _hypervisorpks=" -j ${_1}" ; _ishypervisor="" ; }
 
 _configgencmd() {
-  skywire-cli config gen -r ${_visorispublic}${_vpnserver}${_testenv}${_bestproto}${_svccconfaddr}${_loglvl}${_dmsghttp}${_ishypervisor}${_displaynodeip}${_pkgenv}${_sk}${_disablepublicautoconn}${_version}${_binpath}${_proxyclientpk}${_startproxyclient}${_noproxyserver}${_proxyserverpass}${_proxyclientpass}${_vpnks}${_addvpn}${_vpnclientpass}${_vpnserverpass}${_vpnserversecure}${_vpnservernetifc}${_hypervisorpks}
+  skywire-cli config gen -r ${_visorispublic}${_vpnserver}${_testenv}${_bestproto}${_svccconfaddr}${_loglvl}${_dmsghttp}${_ishypervisor}${_displaynodeip}${_pkgenv}${_sk}${_disablepublicautoconn}${_version}${_binpath}${_proxyclientpk}${_startproxyclient}${_proxyserver}${_vpnks}${_addvpn}${_vpnserversecure}${_vpnservernetifc}${_hypervisorpks}
 }
-    _configgencmdcolor="${_cyan}skywire-cli ${_yellow}config gen -r ${_visorispublic}${_vpnserver}${_testenv}${_bestproto}${_svccconfaddr}${_loglvl}${_dmsghttp}${_ishypervisor}${_displaynodeip}${_pkgenv}${_sk}${_disablepublicautoconn}${_version}${_binpath}${_proxyclientpk}${_startproxyclient}${_noproxyserver}${_proxyserverpass}${_proxyclientpass}${_vpnks}${_addvpn}${_vpnclientpass}${_vpnserverpass}${_vpnserversecure}${_vpnservernetifc}${_hypervisorpks}"
+    _configgencmdcolor="${_cyan}skywire-cli ${_yellow}config gen -r ${_visorispublic}${_vpnserver}${_testenv}${_bestproto}${_svccconfaddr}${_loglvl}${_dmsghttp}${_ishypervisor}${_displaynodeip}${_pkgenv}${_sk}${_disablepublicautoconn}${_version}${_binpath}${_proxyclientpk}${_startproxyclient}${_proxyserver}${_vpnks}${_addvpn}${_vpnserversecure}${_vpnservernetifc}${_hypervisorpks}"
   fi
 	_msg3 "Generating skywire config with command:
   ${_configgencmdcolor}"
@@ -168,13 +168,9 @@ _pkgenv=" -p" ;
 [[ -n "${BINPATH}" ]] && _binpath=" --binpath='${BINPATH}'" ;
 [[ -n "${PROXYCLIENTPK}" ]] && _proxyclientpk=" --proxyclientpk='${PROXYCLIENTPK}'" ;
 [[ "${STARTPROXYCLIENT}" == "true" ]] && _startproxyclient=" --startproxyclient" ;
-[[ "${NOPROXYSERVER}" == "true" ]] && _noproxyserver=" --noproxyserver" ;
-[[ -n "${PROXYSEVERPASS}" ]]  && _proxyserverpass=" --proxyserverpass='${PROXYSEVERPASS}'" ;
-[[ -n "${PROXYCLIENTPASS}" ]] && _proxyclientpass=" --proxyclientpass='${PROXYCLIENTPASS}'" ;
+[[ "${PROXYSERVER}" == "false" ]] && _proxyserver=" --serveproxy=false" ;
 [[ "${VPNKS}" == "true" ]] && _vpnks=" --killsw='${VPNKS}'" ;
 [[ -n "${ADDVPNPK}" ]] && _addvpn=" --addvpn='${ADDVPNPK}'" ;
-[[ -n "${VPNCLIENTPASS}" ]] && _vpnclientpass=" --vpnpass='${VPNCLIENTPASS}'" ;
-[[ -n "${VPNSEVERPASS}" ]] && _vpnserverpass=" --vpnserverpass='${VPNSEVERPASS}'" ;
 [[ -n "${VPNSEVERSECURE}" ]] && _vpnserversecure=" --secure='${VPNSEVERSECURE}'" ;
 [[ -n "${VPNSEVERNETIFC}" ]] && _vpnservernetifc=" --netifc='${VPNSEVERNETIFC}'" ;
 [[ "${#HYPERVISORPKS[@]}" -gt 0 ]] && IFS=',' _hypervisorpks=" -j '${HYPERVISORPKS[*]}'" ;

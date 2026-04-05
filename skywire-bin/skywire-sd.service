@@ -3,9 +3,9 @@ Description=Skywire service-discovery service
 Wants=network-online.target redis.service postgresql.service
 
 [Service]
+Environment="GODEBUG=madvdontneed=1"
 Type=simple
-ExecStartPre=/bin/bash -c '[[ ! -f /etc/skywire-sd.conf ]] && skywire cli config gen-keys | tee /etc/skywire-sd.conf || true'
-ExecStart=/bin/bash -c 'skywire svc sd --sk $$(tail -n1 /etc/skywire-sd.conf)'
+ExecStart=/usr/bin/skywire svc sd --keyfile /etc/skywire-sd.key
 Restart=always
 RestartSec=20
 TimeoutSec=30
