@@ -74,6 +74,6 @@ echo "Skywire updated to $SHORT"
 # Run autoconfig and restart if running via systemd
 if systemctl is-active --quiet skywire 2>/dev/null; then
     echo "Running autoconfig and restarting skywire..."
-    systemctl start skywire-autoconfig 2>/dev/null || skywire cli config auto 2>/dev/null || true
+    skywire autoconfig 2>/dev/null || skywire-autoconfig 2>/dev/null || true
     systemctl restart skywire
 fi
