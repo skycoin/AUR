@@ -3,9 +3,9 @@ Description=Skywire route-finder service
 Wants=network-online.target postgresql.service
 
 [Service]
+Environment="GODEBUG=madvdontneed=1"
 Type=simple
-ExecStartPre=/bin/bash -c '[[ ! -f /etc/skywire-rf.conf ]] && skywire cli config gen-keys | tee /etc/skywire-rf.conf || true'
-ExecStart=/bin/bash -c "skywire svc rf --sk $$(tail -n1 /etc/skywire-rf.conf)"
+ExecStart=/usr/bin/skywire svc rf --keyfile /etc/skywire-rf.key
 Restart=always
 RestartSec=20
 TimeoutSec=30

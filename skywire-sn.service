@@ -3,9 +3,10 @@ Description=Skywire route setup-node service
 Wants=network-online.target
 
 [Service]
+Environment="GODEBUG=madvdontneed=1"
 Type=simple
-ExecStartPre=/bin/bash -c '[[ ! -f /etc/skywire-sn.json ]] && skywire cli config gen -n --loglvl debug | jq \'{public_key: .pk, secret_key: .sk, dmsg: {discovery: .dmsg.discovery, sessions_count: .dmsg.sessions_count, servers: .dmsg.servers}, transport_discovery: .transport.discovery, log_level: .log_level}\' | tee skywire-sn.json || true'
-ExecStart=/bin/skywire svc sn /etc/skywire-sn.json
+ExecStartPre=/bin/bash -c '[[ ! -f /etc/skywire-sn.json ]] && skywire cli config gen -n --loglvl debug | jq "{public_key: .pk, secret_key: .sk, dmsg: {discovery: .dmsg.discovery, sessions_count: .dmsg.sessions_count, servers: .dmsg.servers}, transport_discovery: .transport.discovery, log_level: .log_level}" | tee /etc/skywire-sn.json || true'
+ExecStart=/usr/bin/skywire svc sn /etc/skywire-sn.json
 Restart=always
 RestartSec=20
 TimeoutSec=30

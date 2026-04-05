@@ -5,7 +5,7 @@
 #}
 
 post_install() {
-/opt/skywire/scripts/skywire-autoconfig
+skywire autoconfig
 }
 
 #pre-upgrade() {

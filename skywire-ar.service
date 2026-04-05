@@ -3,9 +3,9 @@ Description=Skywire address-resolver service
 Wants=network-online.target redis.service
 
 [Service]
+Environment="GODEBUG=madvdontneed=1"
 Type=simple
-ExecStartPre=/bin/bash -c '[[ ! -f /etc/skywire-ar.conf ]] && skywire cli config gen-keys | tee /etc/skywire-ar.conf || true'
-ExecStart=/bin/bash -c "skywire svc ar --sk $$(tail -n1 /etc/skywire-ar.conf)"
+ExecStart=/usr/bin/skywire svc ar --keyfile /etc/skywire-ar.key
 Restart=always
 RestartSec=20
 TimeoutSec=30

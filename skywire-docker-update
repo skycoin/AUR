@@ -1,0 +1,76 @@
+#!/bin/bash
+# /usr/bin/skywire-docker-update
+# Auto-update skywire docker deployment to latest CI-tested commit
+# Runs as skywire-build user (must be in docker group)
+set -e
+
+# Source configuration
+SKYENV=${SKYENV:-/etc/skywire.conf}
+[[ -f "$SKYENV" ]] && source "$SKYENV"
+
+# DEPLOY_DIR should be set in /etc/skywire.conf or environment
+DEPLOY_DIR=${DEPLOY_DIR:-""}
+if [ -z "$DEPLOY_DIR" ]; then
+    echo "DEPLOY_DIR not set. Set it in /etc/skywire.conf or environment."
+    exit 1
+fi
+
+if [ ! -f "$DEPLOY_DIR/compose.yaml" ] && [ ! -f "$DEPLOY_DIR/docker-compose.yml" ]; then
+    echo "No compose.yaml or docker-compose.yml found in $DEPLOY_DIR"
+    exit 1
+fi
+
+COMMIT_FILE="$DEPLOY_DIR/.current-commit"
+UPDATE_CHANNEL=${UPDATE_CHANNEL:-stable}
+BUILD_USER="skywire-build"
+BUILD_HOME="/var/lib/${BUILD_USER}"
+BUILD_GOPATH="${BUILD_HOME}/go"
+
+# Ensure build user exists
+if ! id "$BUILD_USER" &>/dev/null; then
+    echo "Build user $BUILD_USER does not exist."
+    exit 1
+fi
+
+# Resolve the target commit
+case "$UPDATE_CHANNEL" in
+  stable)
+    _tmpdir=$(mktemp -d)
+    chown "$BUILD_USER:" "$_tmpdir"
+    TARGET=$(runuser -u "$BUILD_USER" -- env GOPATH="$BUILD_GOPATH" GOCACHE="$_tmpdir" \
+        go run github.com/skycoin/skywire/cmd/skywire-commit@skywire-commit 2>/dev/null || echo "")
+    rm -rf "$_tmpdir"
+    if [ -z "$TARGET" ]; then
+        echo "Failed to fetch latest tested commit"
+        exit 1
+    fi
+    ;;
+  develop|latest)
+    echo "docker-update only supports stable channel (CI-tested commits)"
+    exit 1
+    ;;
+  *)
+    TARGET="$UPDATE_CHANNEL"
+    ;;
+esac
+
+SHORT=${TARGET:0:12}
+CURRENT=$(cat "$COMMIT_FILE" 2>/dev/null || echo "none")
+
+if [ "$SHORT" = "$CURRENT" ]; then
+    echo "Deployment up to date at $SHORT"
+    exit 0
+fi
+
+echo "Updating deployment from $CURRENT to $SHORT"
+
+# Pull and re-tag as build user (needs docker group membership)
+runuser -u "$BUILD_USER" -- docker pull "skycoin/skywire:${SHORT}"
+runuser -u "$BUILD_USER" -- docker tag "skycoin/skywire:${SHORT}" skycoin/skywire:test
+
+# Recreate containers
+cd "$DEPLOY_DIR"
+runuser -u "$BUILD_USER" -- docker compose up -d --force-recreate
+
+echo "$SHORT" > "$COMMIT_FILE"
+echo "Deployment updated to $SHORT"

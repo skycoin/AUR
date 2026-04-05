@@ -1,0 +1,10 @@
+[Unit]
+Description=Skywire daily auto-update check
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=3600
+Persistent=true
+
+[Install]
+WantedBy=timers.target
