@@ -62,7 +62,7 @@ build() {
     echo "Maintainer: ${_githuborg}" >> ${srcdir}/${_pkgarch}.control
     echo "Description: ${pkgdesc}" >> ${srcdir}/${_pkgarch}.control
   done
-  echo -e '#!/bin/bash\nskywire cli config auto' > "${srcdir}/postinst.sh"
+  echo -e '#!/bin/bash\nskywire autoconfig' > "${srcdir}/postinst.sh"
   echo -e '#!/bin/bash\n[[ -d /opt/skywire ]]  && rm /opt/skywire || echo "error: directory /opt/skywire not present so not removed"' | tee "${srcdir}/prerm.sh"
   _build
 }
