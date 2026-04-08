@@ -3,15 +3,15 @@
 # Verifies the new binary works before deploying.
 # Configure via /etc/skywire.conf or environment:
 #   DOCKER_IMAGE    - image to pull (default: skycoin/skywire:test)
-#   COMPOSE_DIR     - directory containing docker-compose.yml
+#   DEPLOY_DIR      - directory containing docker-compose.yml
 set -e
 
 # Source configuration
 SKYENV=${SKYENV:-/etc/skywire.conf}
-[[ -f "$SKYENV" ]] && source "$SKYENV"
+[[ -f "$SKYENV" ]] && source "$SKYENV" # shellcheck source=/etc/skywire.conf
 
 IMAGE="${DOCKER_IMAGE:-skycoin/skywire:test}"
-COMPOSE_DIR="${COMPOSE_DIR:-$(cd "$(dirname "$0")" && pwd)}"
+COMPOSE_DIR="${DEPLOY_DIR:-${COMPOSE_DIR:-$(cd "$(dirname "$0")" && pwd)}}"
 
 OLD_ID=$(docker image inspect "$IMAGE" --format '{{.Id}}' 2>/dev/null || echo "none")
 docker pull "$IMAGE" -q

@@ -10,12 +10,13 @@ license=('license-free')
 unset source_x86_64 source_i686 source_aarch64 source_armv8 source_arm source_armv7 source_armv7l source_armv7h source_riscv64
 unset sha256sums_x86_64 sha256sums_i686 sha256sums_aarch64 sha256sums_armv8 sha256sums_arm sha256sums_armv7 sha256sums_armv7l sha256sums_armv7h
 unset backup _source _desktop _icon _service _script _binarchive _release_url _binaryscript _appscript install
+unset provides conflicts
 build() { true; }
 _scripts=("docker-autopull.sh")
 _services=("docker-autopull.service")
 _timers=("docker-autopull.timer")
 source=("${_scripts[@]}" "${_services[@]}" "${_timers[@]}")
-sha256sums=('53bf0984e0b9a5e787f599fa748cfd49fcb72d80f1a6a6c5ca01868882bcce1c'
+sha256sums=('6d1c41f2cdde08f36ded150390b32cd0e6868ed413fe1c708c9baa6c4e7ccf79'
             '22c40f57c7ecd3f34758abc89d34164e6e1836d663c34692b2f2938b00cccb71'
             'db7f0de63785507c4e67f0037ef44ca6be00e0b123cc1ac156d52e45c6f867e9')
 
