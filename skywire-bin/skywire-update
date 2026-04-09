@@ -49,14 +49,20 @@ case "$UPDATE_CHANNEL" in
     ;;
 esac
 
-# Check if update is needed (skip for branch names)
+# Check if update is needed by querying the Go module proxy
 CURRENT=$(skywire -b 2>/dev/null | grep -oP 'v.*-\K[a-f0-9]+' || echo "none")
-SHORT=${TARGET:0:12}
-if [ "$SHORT" = "$CURRENT" ] && [ "$UPDATE_CHANNEL" != "develop" ] && [ "$UPDATE_CHANNEL" != "latest" ]; then
-    echo "Skywire is up to date at $SHORT"
-    exit 0
+
+# Resolve branch/tag to a commit via Go module proxy (no build needed)
+if [ "$TARGET" = "develop" ] || [ "$TARGET" = "latest" ]; then
+    PROXY_VERSION=$(cd /tmp && go list -m -json "github.com/skycoin/skywire@${TARGET}" 2>/dev/null \
+        | grep -oP '"Version":\s*"v[^"]*-\K[a-f0-9]+' || echo "")
+    if [ -n "$PROXY_VERSION" ] && [ "$PROXY_VERSION" = "$CURRENT" ]; then
+        echo "Skywire is up to date at $CURRENT"
+        exit 0
+    fi
 fi
 
+SHORT=${TARGET:0:12}
 echo "Updating skywire ($UPDATE_CHANNEL): $CURRENT -> $SHORT"
 
 # Build as unprivileged user
