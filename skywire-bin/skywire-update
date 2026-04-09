@@ -14,6 +14,11 @@ SKYENV=${SKYENV:-/etc/skywire.conf}
 #   "<commit-hash>" = pin to a specific commit
 UPDATE_CHANNEL=${UPDATE_CHANNEL:-stable}
 
+# GOPROXY_MODE controls Go module proxy behavior:
+#   ""          = use default (proxy.golang.org)
+#   "direct"    = bypass proxy, fetch directly from git (faster for latest commits)
+GOPROXY_MODE=${GOPROXY_MODE:-}
+
 BUILD_USER="skywire-build"
 BUILD_HOME="/var/lib/${BUILD_USER}"
 BUILD_GOPATH="${BUILD_HOME}/go"
@@ -54,7 +59,9 @@ CURRENT=$(skywire -b 2>/dev/null | grep -oP 'v.*-\K[a-f0-9]+' || echo "none")
 
 # Resolve branch/tag to a commit via Go module proxy (no build needed)
 if [ "$TARGET" = "develop" ] || [ "$TARGET" = "latest" ]; then
-    PROXY_VERSION=$(cd /tmp && go list -m -json "github.com/skycoin/skywire@${TARGET}" 2>/dev/null \
+    _goproxy_env=""
+    [ "$GOPROXY_MODE" = "direct" ] && _goproxy_env="GOPROXY=direct"
+    PROXY_VERSION=$(cd /tmp && env $_goproxy_env go list -m -json "github.com/skycoin/skywire@${TARGET}" 2>/dev/null \
         | grep -oP '"Version":\s*"v[^"]*-\K[a-f0-9]+' || echo "")
     if [ -n "$PROXY_VERSION" ] && [ "$PROXY_VERSION" = "$CURRENT" ]; then
         echo "Skywire is up to date at $CURRENT"
@@ -66,10 +73,13 @@ SHORT=${TARGET:0:12}
 echo "Updating skywire ($UPDATE_CHANNEL): $CURRENT -> $SHORT"
 
 # Build as unprivileged user
+_goproxy_build=""
+[ "$GOPROXY_MODE" = "direct" ] && _goproxy_build="GOPROXY=direct"
 runuser -u "$BUILD_USER" -- env \
     GOPATH="$BUILD_GOPATH" \
     GOCACHE="$BUILD_GOCACHE" \
     GOFLAGS=-trimpath \
+    $_goproxy_build \
     go install "github.com/skycoin/skywire@${TARGET}"
 
 # Install as root
