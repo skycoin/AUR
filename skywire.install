@@ -4,8 +4,25 @@
 #}
 
 post_install() {
-#/opt/skywire/bin/skywire-cli config auto
-/opt/skywire/scripts/skywire-autoconfig
+  # File caps for VPN apps + low-port hypervisor binds. Survives
+  # User= changes; required for the user-mode unit (which can't be
+  # granted ambient caps).
+  if command -v setcap >/dev/null 2>&1 ; then
+    setcap 'cap_net_admin,cap_net_bind_service+eip' /opt/skywire/bin/skywire 2>/dev/null || true
+  fi
+
+  # _skywire user + /var/lib/skywire dir + /opt/skywire chown are
+  # handled declaratively by /usr/lib/sysusers.d/skywire.conf and
+  # /usr/lib/tmpfiles.d/skywire.conf. Pacman's systemd hooks run
+  # systemd-sysusers and systemd-tmpfiles --create when the package
+  # lands these files.
+
+  # Run the Go-side autoconfig (which now reads /etc/skywire.conf
+  # for PKGENV/USRENV/SKYWIRE_USER) instead of the legacy bash
+  # autoconfig. The shell wrapper still ships at
+  # /opt/skywire/scripts/skywire-autoconfig for back-compat with
+  # any operator scripts that call it directly.
+  skywire autoconfig
 }
 
 #pre-upgrade() {
@@ -13,14 +30,16 @@ post_install() {
 #}
 
 post_upgrade() {
-post_install
+  post_install
 }
 
 pre-remove() {
-systemctl disable --now skywire.service
+  systemctl disable --now skywire.service 2>/dev/null || true
 }
 
 post_remove() {
-#remove possibly dangling configs so as not to interfere with future installs
-rm -rf /opt/skywire
+  rm -f /etc/systemd/system/skywire.service.d/skywire-user.conf
+  rmdir --ignore-fail-on-non-empty /etc/systemd/system/skywire.service.d 2>/dev/null || true
+  rm -rf /opt/skywire
+  systemctl daemon-reload 2>/dev/null || true
 }

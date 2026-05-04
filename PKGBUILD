@@ -17,6 +17,7 @@ license=('license-free')
 makedepends=("git" "go>=1.24" "musl" "kernel-headers-musl")
 [[ ${REBUILDUI} == "1" ]] && makedepends=(${makedepends[@]} "npm")
 install=skywire.install
+backup=("etc/skywire.conf")
 _script=("skywire-autoconfig")
 _desktop=("skywire.desktop" "skywirevpn.desktop")
 _icon=("skywirevpn.png" "skywire.png")
@@ -74,7 +75,6 @@ _scriptsdir="${_dir}/scripts"
 _msg2 'creating dirs'
 mkdir -p "${_pkgdir}/usr/bin"
 mkdir -p "${_pkgdir}/${_dir}/bin"
-mkdir -p "${_pkgdir}/${_dir}/local/custom"
 mkdir -p "${_pkgdir}/${_dir}/scripts"
 mkdir -p "${_pkgdir}/${_systemddir}"
 _msg2 'installing scripts and binaries'
@@ -95,6 +95,23 @@ for _i in "${_service[@]}" ; do
   install -Dm644 "${srcdir}/${_skywirebin}${_i}" "${_pkgdir}/${_systemddir}/${_i}"
   install -Dm644 "${srcdir}/${_skywirebin}${_i}" "${_pkgdir}/etc/skel/.config/systemd/user/${_i}"
 done
+
+# Pull the user-mode unit, sysusers/tmpfiles declarations, and the
+# default /etc/skywire.conf template from the skywire-bin git
+# checkout (same source tree). Keeps the file shapes identical
+# across both AUR packages — only the build step differs (this one
+# builds from source, skywire-bin uses upstream release tarballs).
+_msg3 'skywire-user.service → /usr/lib/systemd/user/skywire.service'
+install -Dm644 "${srcdir}/${_skywirebin}skywire-user.service" "${_pkgdir}/usr/lib/systemd/user/skywire.service"
+install -Dm644 "${srcdir}/${_skywirebin}skywire-user.service" "${_pkgdir}/etc/skel/.config/systemd/user/skywire.service"
+
+_msg2 'Installing sysusers.d / tmpfiles.d (declarative user + dirs)'
+install -Dm644 "${srcdir}/${_skywirebin}skywire.sysusers" "${_pkgdir}/usr/lib/sysusers.d/skywire.conf"
+install -Dm644 "${srcdir}/${_skywirebin}skywire.tmpfiles" "${_pkgdir}/usr/lib/tmpfiles.d/skywire.conf"
+
+_msg3 'skywire.conf → /etc/skywire.conf (default template)'
+install -Dm640 "${srcdir}/${_skywirebin}skywire.conf" "${_pkgdir}/etc/skywire.conf"
+
 _msg2 'installing desktop files and icons'
 mkdir -p "${_pkgdir}/usr/share/applications/" "${_pkgdir}/usr/share/icons/hicolor/48x48/apps/"
 for _i in "${_desktop[@]}" ; do
