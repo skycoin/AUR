@@ -1,0 +1,10 @@
+# Skywire visor service user — created by systemd-sysusers at
+# package install time. Runs the visor when /etc/skywire.conf sets
+# SKYWIRE_USER=_skywire (the package default). Underscore prefix
+# follows the BSD/Debian convention for service users; avoids
+# colliding with the existing `skywire` human user that some
+# deployment hosts already have.
+#
+# Format: man sysusers.d
+# u <name> <id> <gecos> <home> <shell>
+u  _skywire  -  "Skywire visor service user"  /var/lib/skywire  /usr/sbin/nologin
