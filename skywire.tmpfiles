@@ -1,0 +1,11 @@
+# Skywire directory ownership — applied by systemd-tmpfiles on
+# package install and at every boot. Pairs with skywire.sysusers
+# (which declares the _skywire user) so the directories are owned
+# by them automatically.
+#
+# Format: man tmpfiles.d
+# Type Path                Mode  User      Group     Age  Argument
+# d   = create directory if missing
+# Z   = recursively adjust ownership/perms on existing path
+d  /var/lib/skywire        0750  _skywire  _skywire  -    -
+Z  /opt/skywire            -     _skywire  _skywire  -    -

@@ -13,6 +13,14 @@ TimeoutSec=30
 # Hard memory limit — systemd kills the visor cleanly if exceeded.
 # Prevents OOM killer from randomly picking victims on low-RAM boards.
 MemoryMax=80%
+# Caps needed by VPN apps (TUN setup, route changes) and by the
+# hypervisor when bound to <1024 ports. Redundant with the file caps
+# postinst applies to /usr/bin/skywire — keeping both is harmless and
+# makes the unit self-documenting. Only meaningful when the unit
+# runs as a non-root User= (set by the autoconfig-managed drop-in
+# at /etc/systemd/system/skywire.service.d/skywire-user.conf when
+# /etc/skywire.conf has SKYWIRE_USER=...).
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 
 [Install]
 WantedBy=multi-user.target

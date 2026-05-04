@@ -1,0 +1,34 @@
+# Skywire user-mode unit. Installed at /usr/lib/systemd/user/skywire.service.
+#
+# Operator workflow:
+#   /etc/skywire.conf:
+#     # PKGENV=true              <- comment this out
+#     # SKYWIRE_USER=_skywire    <- and this
+#     USRENV=true                <- and uncomment this
+#   $ skywire autoconfig         (generates ~/skywire-config.json)
+#   $ systemctl --user enable --now skywire
+#
+# AmbientCapabilities= is intentionally absent: user-mode systemd
+# can't grant ambient caps to the spawned process. VPN apps on this
+# unit rely on the postinst-applied file caps on /usr/bin/skywire
+# (cap_net_admin,cap_net_bind_service+eip), which the kernel applies
+# on every exec regardless of who launches it.
+
+[Unit]
+Description=Skywire (user mode)
+Wants=network-online.target
+
+[Service]
+Environment="GODEBUG=madvdontneed=1"
+Type=simple
+Environment="SYSTEMDCHILD=1"
+ExecStart=/usr/bin/skywire visor -ps -q http --loglvl debug
+Restart=always
+RestartSec=20
+TimeoutSec=30
+# Hard memory ceiling. Mirrors the system unit; kept conservative so
+# user-mode visors on shared boxes don't squeeze the operator.
+MemoryMax=80%
+
+[Install]
+WantedBy=default.target

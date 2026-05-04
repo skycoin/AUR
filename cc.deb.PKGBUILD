@@ -62,8 +62,43 @@ build() {
     echo "Maintainer: ${_githuborg}" >> ${srcdir}/${_pkgarch}.control
     echo "Description: ${pkgdesc}" >> ${srcdir}/${_pkgarch}.control
   done
-  echo -e '#!/bin/bash\nskywire autoconfig' > "${srcdir}/postinst.sh"
-  echo -e '#!/bin/bash\n[[ -d /opt/skywire ]]  && rm /opt/skywire || echo "error: directory /opt/skywire not present so not removed"' | tee "${srcdir}/prerm.sh"
+  # Postinst mirrors skywire.install's post_install. systemd-sysusers
+  # and systemd-tmpfiles do the heavy lifting (user creation, dir
+  # ownership, /opt/skywire chown via the `Z` recursive-adjust line)
+  # — this PKGBUILD doesn't use debhelper, so we call them
+  # explicitly. Both are idempotent.
+  cat > "${srcdir}/postinst.sh" <<'POSTINST_EOF'
+#!/bin/bash
+set -e
+
+# Process the sysusers.d / tmpfiles.d files we shipped, so the
+# _skywire user exists and /opt/skywire is owned by them BEFORE
+# autoconfig runs and tries to write into the dir. systemd-sysusers
+# creates the user; systemd-tmpfiles --create applies the d/Z lines.
+if command -v systemd-sysusers >/dev/null 2>&1 ; then
+  systemd-sysusers /usr/lib/sysusers.d/skywire.conf 2>/dev/null || true
+fi
+if command -v systemd-tmpfiles >/dev/null 2>&1 ; then
+  systemd-tmpfiles --create /usr/lib/tmpfiles.d/skywire.conf 2>/dev/null || true
+fi
+
+# File caps for VPN apps + low-port hypervisor binds. Survives
+# User= changes; required for the user-mode unit (which can't be
+# granted ambient caps).
+if command -v setcap >/dev/null 2>&1 ; then
+  setcap 'cap_net_admin,cap_net_bind_service+eip' /opt/skywire/bin/skywire 2>/dev/null || true
+fi
+
+skywire autoconfig
+POSTINST_EOF
+  cat > "${srcdir}/prerm.sh" <<'PRERM_EOF'
+#!/bin/bash
+systemctl disable --now skywire.service 2>/dev/null || true
+[[ -d /opt/skywire ]] && rm -rf /opt/skywire
+rm -f /etc/systemd/system/skywire.service.d/skywire-user.conf
+rmdir --ignore-fail-on-non-empty /etc/systemd/system/skywire.service.d 2>/dev/null || true
+systemctl daemon-reload 2>/dev/null || true
+PRERM_EOF
   _build
 }
 

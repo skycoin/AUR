@@ -5,7 +5,22 @@
 #}
 
 post_install() {
-skywire autoconfig
+  # Apply file caps so VPN apps (cap_net_admin for TUN/iptables) and
+  # hypervisor low-port binds work for non-root visor identities —
+  # critical for the user-mode unit where systemd can't grant ambient
+  # caps. setcap is on the inode so the cap survives any User=
+  # configuration. Redundant with the system unit's
+  # AmbientCapabilities= line; both is harmless and self-documenting.
+  if command -v setcap >/dev/null 2>&1 ; then
+    setcap 'cap_net_admin,cap_net_bind_service+eip' /opt/skywire/bin/skywire 2>/dev/null || true
+  fi
+
+  # _skywire user + /var/lib/skywire dir + /opt/skywire chown are
+  # handled declaratively by /usr/lib/sysusers.d/skywire.conf and
+  # /usr/lib/tmpfiles.d/skywire.conf. systemd-sysusers and
+  # systemd-tmpfiles run on every install and at boot.
+
+  skywire autoconfig
 }
 
 #pre-upgrade() {
@@ -13,15 +28,25 @@ skywire autoconfig
 #}
 
 post_upgrade() {
-post_install
+  post_install
 }
 
 pre-remove() {
-systemctl disable --now skywire.service
-systemctl disable --now skywire-visor.service
+  systemctl disable --now skywire.service 2>/dev/null || true
+  systemctl disable --now skywire-visor.service 2>/dev/null || true
 }
 
 post_remove() {
-#remove possibly dangling configs so as not to interfere with future installs
-rm -rf /opt/skywire
+  # Pull the autoconfig-written drop-in so the next install starts
+  # from a clean slate. Don't touch the package-shipped unit file or
+  # the operator's /etc/skywire.conf — those are explicit decisions.
+  rm -f /etc/systemd/system/skywire.service.d/skywire-user.conf
+  rmdir --ignore-fail-on-non-empty /etc/systemd/system/skywire.service.d 2>/dev/null || true
+
+  # Drop possibly-dangling configs so as not to interfere with future
+  # installs. _skywire user is intentionally NOT removed — sysusers.d
+  # convention leaves system users in place across uninstalls (they
+  # may own files outside the install tree).
+  rm -rf /opt/skywire
+  systemctl daemon-reload 2>/dev/null || true
 }
