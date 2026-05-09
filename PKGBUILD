@@ -3,7 +3,7 @@ pkgname=skywire-bin
 _pkgname=${pkgname/-bin/}
 _githuborg=skycoin
 pkgdesc="Skywire: Building a new Internet. Skycoin.com"
-pkgver='1.3.47'
+pkgver='1.3.50'
 pkgrel='1'
 _rc=''
 #_rc='-pr1'
@@ -19,7 +19,7 @@ optdepends=('redis: required by address-resolver transport-discovery dmsg-discov
 'jq: config generation for setup-node.service')
 license=('license-free')
 install=skywire.install
-backup=("opt/${_pkgname}/{users.db,skywire.json,local}" "etc/skywire.conf")
+backup=("opt/${_pkgname}/users.db" "opt/${_pkgname}/skywire.json" "opt/${_pkgname}/local" "etc/skywire.conf")
 _script=("skywire-autoconfig")
 _desktop=("skywire.desktop" "skywirevpn.desktop")
 _icon=("skywirevpn.png" "skywire.png")
@@ -53,7 +53,7 @@ sha256sums=('6350b0c25f1782485a3a35d9e2ed7fc34caab5eaf07cbb784323d6a87e70d66b'
             '00da5a9afdf5a8c7033978d2074039ba1ff7bc7a7221fbd278eb1270bdeb8eae'
             'ec24750a99f5cda8d8a8dc94743943218e1b2088c2b2c7dc1644ee78d954fe7e'
             'a6941680b5858ca3e0c85d9bf5824455a0c95524b61e42352462f2abbb750495'
-            'SKIP'
+            '459c78b3a9a6751a0eb9186bf2d509b5485d4ff46f938bbd03ec344ebd0ca6a2'
             '8519d027325dcb34877bb5b0fb0c3c035d7589c0046b53935e2b949d436c4be3'
             'b2be9ad04aece39759299c2333c51e81bf543fb7a6ee8f52046d499003cadf83'
             '2e0daf72fffbf81e9aa65ba0818195f9d3d43c6eb3f4656f40a4cf2f204aba4a'
@@ -62,18 +62,18 @@ sha256sums=('6350b0c25f1782485a3a35d9e2ed7fc34caab5eaf07cbb784323d6a87e70d66b'
             'ea6001f9dea428a6bd877676b42a2c7d6acdd36124eab2ec9d980645a55a115c'
             '0a24b82c6ac7775b541af426912091fecb34ad5cd9e741a8c6de3ac1c0ee3218'
             '03ee60eecd19c5d5260f3ae40f535c20488f045fea2f8d72d76f2778b6470809'
-            'SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP')
-sha256sums_i686=('ff40bcbf674cf7e1a1ffda11b1e981867c5b10e449ea6c653c245e0a9eec14f9')
-sha256sums_x86_64=('f5e34a85d69ee1840ff86e59f2f18c3a5af20c139e5bc6b3553de3eb6f15dcfa')
-sha256sums_aarch64=('4383b2d0471253cf65986f7d1716b9b4b7a50beeaebbb170e49ad64f7beb67cb')
-sha256sums_armv8=('4383b2d0471253cf65986f7d1716b9b4b7a50beeaebbb170e49ad64f7beb67cb')
-sha256sums_armv7=('ac22701d0ebf4e9ee45f11622896deb3181dc256c2a8f54e3658ee0b784ad01b')
-sha256sums_armv7l=('ac22701d0ebf4e9ee45f11622896deb3181dc256c2a8f54e3658ee0b784ad01b')
-sha256sums_armv7h=('ac22701d0ebf4e9ee45f11622896deb3181dc256c2a8f54e3658ee0b784ad01b')
-sha256sums_arm=('64d40ab303bb74adaea9fb0a7588768482ad1c1521c6b41fec599507ea237e22')
+            '483353f172cb12c8d726dce8e0cd284ff6bf6a69b2912274559bc199b1c7f3e3'
+            '60cd97d7ff821f793de68f38aad4468fc83fcddf31449397227d16a746cc8a92'
+            '2f1511abbd2b42f4bfebf2a872295de5992fe98d81163ac9ab7744d61608af5e'
+            '67211fd86a09a193855a3d6aae224ade46f5fff285691ff6c5705b1be08a9c42')
+sha256sums_i686=('868c2e836248dd10078dd9a6e03d8e85c0883e67ab9e3d36b818bca853d81dd9')
+sha256sums_x86_64=('2711d622ba09a970c7e42f797b91da1f8028eacd8f4e408fe66172d5cb47aaca')
+sha256sums_aarch64=('7312e1aceeafd499dd77c214f26a6b675cb45830c568016dee1f6b69f1d0422a')
+sha256sums_armv8=('7312e1aceeafd499dd77c214f26a6b675cb45830c568016dee1f6b69f1d0422a')
+sha256sums_armv7=('12b2d37be7f6d7aa23ef4754c0e3a3a896098917b1ff0077806a8c1d425eb914')
+sha256sums_armv7l=('12b2d37be7f6d7aa23ef4754c0e3a3a896098917b1ff0077806a8c1d425eb914')
+sha256sums_armv7h=('12b2d37be7f6d7aa23ef4754c0e3a3a896098917b1ff0077806a8c1d425eb914')
+sha256sums_arm=('92e6d1c0a145b73ffe7cb649b49008df567ef1434a9ee570922f0ee589fd22ac')
 #https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-amd64.tar.gz
 #https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-arm64.tar.gz
 #https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-armhf.tar.gz
@@ -174,12 +174,17 @@ _msg2 'Installing sysusers.d / tmpfiles.d (declarative user + dirs)'
 install -Dm644 "${srcdir}/${_skywirebin}skywire.sysusers" "${_pkgdir}/usr/lib/sysusers.d/skywire.conf"
 install -Dm644 "${srcdir}/${_skywirebin}skywire.tmpfiles" "${_pkgdir}/usr/lib/tmpfiles.d/skywire.conf"
 
-# Default /etc/skywire.conf — installed only on first install (the
-# backup= line in the PKGBUILD preserves operator edits across
-# upgrades; pacman renames it to .pacnew on conflicts and lets the
-# operator merge).
-_msg3 'skywire.conf → /etc/skywire.conf (default template)'
-install -Dm640 "${srcdir}/${_skywirebin}skywire.conf" "${_pkgdir}/etc/skywire.conf"
+# Default /etc/skywire.conf — generated at package time via
+# `skywire cli config gen -q` so the canonical template (with every
+# knob and its default) is what lands in the package, instead of a
+# hand-maintained snapshot that drifts. Same file is the source of
+# the .pacnew on upgrades, so operators always merge against the
+# current canonical version. The backup= line preserves their
+# in-place edits across upgrades.
+_msg3 'skywire.conf → /etc/skywire.conf (canonical template via cli config gen -q)'
+mkdir -p "${_pkgdir}/etc"
+"${GOBIN}/skywire-cli" config gen -q > "${_pkgdir}/etc/skywire.conf"
+chmod 640 "${_pkgdir}/etc/skywire.conf"
 
 _msg2 'installing desktop files and icons'
 mkdir -p "${_pkgdir}/usr/share/applications/" "${_pkgdir}/usr/share/icons/hicolor/48x48/apps/"
