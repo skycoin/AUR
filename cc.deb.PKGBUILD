@@ -43,12 +43,12 @@ sha256sums=('6350b0c25f1782485a3a35d9e2ed7fc34caab5eaf07cbb784323d6a87e70d66b'
             '60cd97d7ff821f793de68f38aad4468fc83fcddf31449397227d16a746cc8a92'
             '2f1511abbd2b42f4bfebf2a872295de5992fe98d81163ac9ab7744d61608af5e'
             '67211fd86a09a193855a3d6aae224ade46f5fff285691ff6c5705b1be08a9c42'
-            '2711d622ba09a970c7e42f797b91da1f8028eacd8f4e408fe66172d5cb47aaca'
-            '868c2e836248dd10078dd9a6e03d8e85c0883e67ab9e3d36b818bca853d81dd9'
-            '7312e1aceeafd499dd77c214f26a6b675cb45830c568016dee1f6b69f1d0422a'
-            '12b2d37be7f6d7aa23ef4754c0e3a3a896098917b1ff0077806a8c1d425eb914'
-            '92e6d1c0a145b73ffe7cb649b49008df567ef1434a9ee570922f0ee589fd22ac'
-            'f296bd12468b4ee9f7204ef693bb206efc7e029dc3cb19535f8ecc71a05b41a4')
+            'aaa05044be112dc5b15a4e965943b46f4a2022806d432b6d69ae6c11201cb847'
+            '2d6629209e20c23c3ccebcbb2429083f448e52adf43e03e82a13feba86034ab1'
+            'c40b43f37bccbd7ded97f9fda6c8f0d5bb504d8aa7b9abb7fe32d46ae8a3e073'
+            'ff7ca35215e7c57e7ff1213fe2d440bb00939c5f07ebec1dcca930c761246755'
+            'bd3a191f5afff6339ab3d61256a2e5c5247924eb8706a65a8ea3e4682da93278'
+            '520b2029133edfb927f932935f29ca269789df012f23f237d58f51b2c2ba8807')
 
 build() {
   _msg2 'creating the DEBIAN/control files'
@@ -94,25 +94,6 @@ if command -v setcap >/dev/null 2>&1 ; then
 fi
 
 skywire autoconfig
-
-# Workaround for an autoconfig bug: when /etc/skywire.conf has no
-# uncommented SKYWIRE_USER= line, autoconfig should clear the
-# systemd drop-in it previously wrote — but it doesn't, so the
-# unit stays pinned to the old User= and either:
-#   - fails CHDIR if that user no longer has permissions, or
-#   - fails the visor's `--pkg requires root` check on startup.
-# Re-check the operator's env file here and remove the stale
-# drop-in ourselves. Idempotent — silent when there's nothing
-# to remove or when the operator legitimately has SKYWIRE_USER set.
-if [ -f /etc/skywire.conf ] && \
-   ! grep -qE '^[[:space:]]*SKYWIRE_USER=' /etc/skywire.conf 2>/dev/null ; then
-  if [ -f /etc/systemd/system/skywire.service.d/skywire-user.conf ] ; then
-    rm -f /etc/systemd/system/skywire.service.d/skywire-user.conf
-    rmdir --ignore-fail-on-non-empty /etc/systemd/system/skywire.service.d 2>/dev/null || true
-    systemctl daemon-reload 2>/dev/null || true
-    echo "  -> Removed stale skywire-user.conf drop-in (SKYWIRE_USER unset in /etc/skywire.conf)"
-  fi
-fi
 POSTINST_EOF
   cat > "${srcdir}/prerm.sh" <<'PRERM_EOF'
 #!/bin/bash
