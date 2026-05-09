@@ -21,6 +21,25 @@ post_install() {
   # systemd-tmpfiles run on every install and at boot.
 
   skywire autoconfig
+
+  # Workaround for an autoconfig bug: when /etc/skywire.conf has no
+  # uncommented SKYWIRE_USER= line, autoconfig should clear the
+  # systemd drop-in it previously wrote — but it doesn't, so the
+  # unit stays pinned to the old User= and either:
+  #   - fails CHDIR if that user no longer has permissions, or
+  #   - fails the visor's `--pkg requires root` check on startup.
+  # Re-check the operator's env file here and remove the stale
+  # drop-in ourselves. Idempotent — silent when there's nothing
+  # to remove or when the operator legitimately has SKYWIRE_USER set.
+  if [[ -f /etc/skywire.conf ]] && \
+     ! grep -qE '^[[:space:]]*SKYWIRE_USER=' /etc/skywire.conf ; then
+    if [[ -f /etc/systemd/system/skywire.service.d/skywire-user.conf ]] ; then
+      rm -f /etc/systemd/system/skywire.service.d/skywire-user.conf
+      rmdir --ignore-fail-on-non-empty /etc/systemd/system/skywire.service.d 2>/dev/null || true
+      systemctl daemon-reload 2>/dev/null || true
+      echo "  -> Removed stale skywire-user.conf drop-in (SKYWIRE_USER unset in /etc/skywire.conf)"
+    fi
+  fi
 }
 
 #pre-upgrade() {

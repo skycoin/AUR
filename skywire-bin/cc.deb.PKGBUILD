@@ -30,7 +30,7 @@ sha256sums=('6350b0c25f1782485a3a35d9e2ed7fc34caab5eaf07cbb784323d6a87e70d66b'
             '00da5a9afdf5a8c7033978d2074039ba1ff7bc7a7221fbd278eb1270bdeb8eae'
             'ec24750a99f5cda8d8a8dc94743943218e1b2088c2b2c7dc1644ee78d954fe7e'
             'a6941680b5858ca3e0c85d9bf5824455a0c95524b61e42352462f2abbb750495'
-            'c8447e76c41738c96fd7b1929bc8af6a7a2e619e05f896741f6a33b7a4ce63ea'
+            '459c78b3a9a6751a0eb9186bf2d509b5485d4ff46f938bbd03ec344ebd0ca6a2'
             '8519d027325dcb34877bb5b0fb0c3c035d7589c0046b53935e2b949d436c4be3'
             'b2be9ad04aece39759299c2333c51e81bf543fb7a6ee8f52046d499003cadf83'
             '2e0daf72fffbf81e9aa65ba0818195f9d3d43c6eb3f4656f40a4cf2f204aba4a'
@@ -39,12 +39,16 @@ sha256sums=('6350b0c25f1782485a3a35d9e2ed7fc34caab5eaf07cbb784323d6a87e70d66b'
             'ea6001f9dea428a6bd877676b42a2c7d6acdd36124eab2ec9d980645a55a115c'
             '0a24b82c6ac7775b541af426912091fecb34ad5cd9e741a8c6de3ac1c0ee3218'
             '03ee60eecd19c5d5260f3ae40f535c20488f045fea2f8d72d76f2778b6470809'
-            'f5e34a85d69ee1840ff86e59f2f18c3a5af20c139e5bc6b3553de3eb6f15dcfa'
-            'ff40bcbf674cf7e1a1ffda11b1e981867c5b10e449ea6c653c245e0a9eec14f9'
-            '4383b2d0471253cf65986f7d1716b9b4b7a50beeaebbb170e49ad64f7beb67cb'
-            'ac22701d0ebf4e9ee45f11622896deb3181dc256c2a8f54e3658ee0b784ad01b'
-            '64d40ab303bb74adaea9fb0a7588768482ad1c1521c6b41fec599507ea237e22'
-            '3068b3fb32bd34787ef09a573fba9fd5f8eaa149afc60afb7cbe2fff469121b8')
+            '483353f172cb12c8d726dce8e0cd284ff6bf6a69b2912274559bc199b1c7f3e3'
+            '60cd97d7ff821f793de68f38aad4468fc83fcddf31449397227d16a746cc8a92'
+            '2f1511abbd2b42f4bfebf2a872295de5992fe98d81163ac9ab7744d61608af5e'
+            '67211fd86a09a193855a3d6aae224ade46f5fff285691ff6c5705b1be08a9c42'
+            '2711d622ba09a970c7e42f797b91da1f8028eacd8f4e408fe66172d5cb47aaca'
+            '868c2e836248dd10078dd9a6e03d8e85c0883e67ab9e3d36b818bca853d81dd9'
+            '7312e1aceeafd499dd77c214f26a6b675cb45830c568016dee1f6b69f1d0422a'
+            '12b2d37be7f6d7aa23ef4754c0e3a3a896098917b1ff0077806a8c1d425eb914'
+            '92e6d1c0a145b73ffe7cb649b49008df567ef1434a9ee570922f0ee589fd22ac'
+            'f296bd12468b4ee9f7204ef693bb206efc7e029dc3cb19535f8ecc71a05b41a4')
 
 build() {
   _msg2 'creating the DEBIAN/control files'
@@ -90,6 +94,25 @@ if command -v setcap >/dev/null 2>&1 ; then
 fi
 
 skywire autoconfig
+
+# Workaround for an autoconfig bug: when /etc/skywire.conf has no
+# uncommented SKYWIRE_USER= line, autoconfig should clear the
+# systemd drop-in it previously wrote — but it doesn't, so the
+# unit stays pinned to the old User= and either:
+#   - fails CHDIR if that user no longer has permissions, or
+#   - fails the visor's `--pkg requires root` check on startup.
+# Re-check the operator's env file here and remove the stale
+# drop-in ourselves. Idempotent — silent when there's nothing
+# to remove or when the operator legitimately has SKYWIRE_USER set.
+if [ -f /etc/skywire.conf ] && \
+   ! grep -qE '^[[:space:]]*SKYWIRE_USER=' /etc/skywire.conf 2>/dev/null ; then
+  if [ -f /etc/systemd/system/skywire.service.d/skywire-user.conf ] ; then
+    rm -f /etc/systemd/system/skywire.service.d/skywire-user.conf
+    rmdir --ignore-fail-on-non-empty /etc/systemd/system/skywire.service.d 2>/dev/null || true
+    systemctl daemon-reload 2>/dev/null || true
+    echo "  -> Removed stale skywire-user.conf drop-in (SKYWIRE_USER unset in /etc/skywire.conf)"
+  fi
+fi
 POSTINST_EOF
   cat > "${srcdir}/prerm.sh" <<'PRERM_EOF'
 #!/bin/bash
