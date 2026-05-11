@@ -95,14 +95,58 @@ fi
 
 skywire autoconfig
 POSTINST_EOF
+  # prerm: stop the daemon. State-bearing paths under /opt/skywire
+  # (skywire.json — visor identity / SK, users.db — hv accounts,
+  # local/* — stats, logs, treestore) must SURVIVE upgrades. The
+  # previous unconditional `rm -rf /opt/skywire` caused every
+  # `apt upgrade skywire-bin` to silently rotate the visor's SK
+  # because the new postinst's `skywire autoconfig` then ran
+  # `cli config gen -r` against an empty path, which can't preserve
+  # keys it can't read. State teardown moved to a postrm that only
+  # fires on $1=purge.
   cat > "${srcdir}/prerm.sh" <<'PRERM_EOF'
 #!/bin/bash
-systemctl disable --now skywire.service 2>/dev/null || true
-[[ -d /opt/skywire ]] && rm -rf /opt/skywire
-rm -f /etc/systemd/system/skywire.service.d/skywire-user.conf
-rmdir --ignore-fail-on-non-empty /etc/systemd/system/skywire.service.d 2>/dev/null || true
-systemctl daemon-reload 2>/dev/null || true
+set -e
+case "$1" in
+    remove|deconfigure)
+        # Genuine uninstall. Stop and disable the unit but leave
+        # /opt/skywire alone: an operator running `apt remove`
+        # (not `apt purge`) may reinstall later and expect their
+        # identity / hypervisor accounts intact. postrm with
+        # $1=purge is where the actual nuke happens.
+        systemctl stop skywire.service 2>/dev/null || true
+        systemctl disable skywire.service 2>/dev/null || true
+        ;;
+    upgrade|failed-upgrade)
+        # New binaries about to unpack over us. Stop the daemon so
+        # the new files aren't held open, but DO NOT touch state
+        # under /opt/skywire — autoconfig's gen -r in postinst will
+        # then preserve the existing SK / accounts / settings.
+        systemctl stop skywire.service 2>/dev/null || true
+        ;;
+esac
 PRERM_EOF
+  # postrm: only purge nukes state. `apt remove` is recoverable;
+  # `apt purge` is the explicit "I'm done with this for good"
+  # signal. Drop-in cleanup also belongs here, not prerm, so
+  # upgrades don't tear it down between the old prerm and the new
+  # postinst.
+  cat > "${srcdir}/postrm.sh" <<'POSTRM_EOF'
+#!/bin/bash
+set -e
+case "$1" in
+    purge)
+        rm -rf /opt/skywire
+        rm -f /etc/systemd/system/skywire.service.d/skywire-user.conf
+        rmdir --ignore-fail-on-non-empty /etc/systemd/system/skywire.service.d 2>/dev/null || true
+        ;;
+    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        # nothing: keep state for possible reinstall, and let the
+        # in-progress upgrade complete normally.
+        ;;
+esac
+systemctl daemon-reload 2>/dev/null || true
+POSTRM_EOF
   _build
 }
 
@@ -145,6 +189,7 @@ _msg2 'installing control file and install scripts'
 install -Dm755 "${srcdir}/${_pkgarch}.control" "${_pkgdir}/DEBIAN/control"
 install -Dm755 "${srcdir}/postinst.sh" "${_pkgdir}/DEBIAN/postinst"
 install -Dm755 "${srcdir}/prerm.sh" "${_pkgdir}/DEBIAN/prerm"
+install -Dm755 "${srcdir}/postrm.sh" "${_pkgdir}/DEBIAN/postrm"
 _msg2 'creating the debian package'
 #create the debian package!
 cd "${pkgdir}"
