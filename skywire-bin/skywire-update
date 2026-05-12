@@ -35,7 +35,12 @@ case "$UPDATE_CHANNEL" in
   stable)
     _tmpdir=$(mktemp -d)
     chown "$BUILD_USER:" "$_tmpdir"
-    TARGET=$(runuser -u "$BUILD_USER" -- env GOPATH="$BUILD_GOPATH" GOCACHE="$_tmpdir" \
+    # GOPROXY=direct on the branch-tip resolver: proxy.golang.org
+    # caches branch-tip → SHA resolutions for up to 30 min. Without
+    # this, a fresh CI promotion to skywire-commit can be invisible
+    # for half an hour and the update silently no-ops in ~250ms with
+    # exit 0. See: AUTO_UPDATE.md "Why GOPROXY=direct?".
+    TARGET=$(runuser -u "$BUILD_USER" -- env GOPATH="$BUILD_GOPATH" GOCACHE="$_tmpdir" GOPROXY=direct \
         go run github.com/skycoin/skywire/cmd/skywire-commit@skywire-commit 2>/dev/null || echo "")
     rm -rf "$_tmpdir"
     if [ -z "$TARGET" ]; then
@@ -57,10 +62,13 @@ esac
 # Check if update is needed by querying the Go module proxy
 CURRENT=$(skywire -b 2>/dev/null | grep -oP 'v.*-\K[a-f0-9]+' || echo "none")
 
-# Resolve branch/tag to a commit via Go module proxy (no build needed)
+# Resolve branch/tag to a commit. GOPROXY=direct by default — see
+# the "stable" path above for the rationale. Operators can opt OUT
+# (cache-on) by setting GOPROXY_MODE=proxy in /etc/skywire.conf
+# when they specifically want proxy.golang.org's cached results.
 if [ "$TARGET" = "develop" ] || [ "$TARGET" = "latest" ]; then
-    _goproxy_env=""
-    [ "$GOPROXY_MODE" = "direct" ] && _goproxy_env="GOPROXY=direct"
+    _goproxy_env="GOPROXY=direct"
+    [ "$GOPROXY_MODE" = "proxy" ] && _goproxy_env=""
     PROXY_VERSION=$(cd /tmp && env $_goproxy_env go list -m -json "github.com/skycoin/skywire@${TARGET}" 2>/dev/null \
         | grep -oP '"Version":\s*"v[^"]*-\K[a-f0-9]+' || echo "")
     if [ -n "$PROXY_VERSION" ] && [ "$PROXY_VERSION" = "$CURRENT" ]; then
@@ -72,9 +80,13 @@ fi
 SHORT=${TARGET:0:12}
 echo "Updating skywire ($UPDATE_CHANNEL): $CURRENT -> $SHORT"
 
-# Build as unprivileged user
-_goproxy_build=""
-[ "$GOPROXY_MODE" = "direct" ] && _goproxy_build="GOPROXY=direct"
+# Build as unprivileged user. Branch-tip targets (develop/latest)
+# need GOPROXY=direct for the same reason as the resolver above;
+# pinned-SHA targets ($UPDATE_CHANNEL=<sha>) work with either since
+# content-addressed module fetches are deterministic. Default on
+# for safety; GOPROXY_MODE=proxy opts back to cached resolution.
+_goproxy_build="GOPROXY=direct"
+[ "$GOPROXY_MODE" = "proxy" ] && _goproxy_build=""
 runuser -u "$BUILD_USER" -- env \
     GOPATH="$BUILD_GOPATH" \
     GOCACHE="$BUILD_GOCACHE" \
