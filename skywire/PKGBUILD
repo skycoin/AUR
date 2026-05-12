@@ -6,7 +6,7 @@ _githuborg=${FORK:-$_projectname}
 pkgdesc="Software defined networking with public keys. Skycoin.com"
 _pkggopath=github.com/${_githuborg}/${_pkgname}
 pkgver='1.3.52'
-pkgrel='1'
+pkgrel='2'
 _rc=''
 #_rc='-pr1'
 _pkgver="${pkgver}${_rc}"
@@ -96,11 +96,11 @@ for _i in "${_service[@]}" ; do
   install -Dm644 "${srcdir}/${_skywirebin}${_i}" "${_pkgdir}/etc/skel/.config/systemd/user/${_i}"
 done
 
-# Pull the user-mode unit, sysusers/tmpfiles declarations, and the
-# default /etc/skywire.conf template from the skywire-bin git
-# checkout (same source tree). Keeps the file shapes identical
-# across both AUR packages — only the build step differs (this one
-# builds from source, skywire-bin uses upstream release tarballs).
+# Pull the user-mode unit and sysusers/tmpfiles declarations from
+# the skywire-bin git checkout (same source tree). Keeps the file
+# shapes identical across both AUR packages — only the build step
+# differs (this one builds from source, skywire-bin uses upstream
+# release tarballs).
 _msg3 'skywire-user.service → /usr/lib/systemd/user/skywire.service'
 install -Dm644 "${srcdir}/${_skywirebin}skywire-user.service" "${_pkgdir}/usr/lib/systemd/user/skywire.service"
 install -Dm644 "${srcdir}/${_skywirebin}skywire-user.service" "${_pkgdir}/etc/skel/.config/systemd/user/skywire.service"
@@ -109,8 +109,17 @@ _msg2 'Installing sysusers.d / tmpfiles.d (declarative user + dirs)'
 install -Dm644 "${srcdir}/${_skywirebin}skywire.sysusers" "${_pkgdir}/usr/lib/sysusers.d/skywire.conf"
 install -Dm644 "${srcdir}/${_skywirebin}skywire.tmpfiles" "${_pkgdir}/usr/lib/tmpfiles.d/skywire.conf"
 
-_msg3 'skywire.conf → /etc/skywire.conf (default template)'
-install -Dm640 "${srcdir}/${_skywirebin}skywire.conf" "${_pkgdir}/etc/skywire.conf"
+# Generate /etc/skywire.conf from the just-built binary instead of
+# shipping a hand-maintained snapshot. Same approach as skywire-bin
+# (PKGBUILD `cli config gen -q`). Invoke the binary directly from
+# ${GOBIN} — NOT the ${GOBIN}/skywire-cli shim that execs
+# /opt/skywire/bin/skywire, since that post-install path doesn't
+# exist during package() on a clean machine. The Dm640 perm here
+# matches the previous static-template install line.
+_msg3 'skywire.conf → /etc/skywire.conf (generated via cli config gen -q)'
+mkdir -p "${_pkgdir}/etc"
+"${GOBIN}/skywire" cli config gen -q > "${_pkgdir}/etc/skywire.conf"
+chmod 640 "${_pkgdir}/etc/skywire.conf"
 
 _msg2 'installing desktop files and icons'
 mkdir -p "${_pkgdir}/usr/share/applications/" "${_pkgdir}/usr/share/icons/hicolor/48x48/apps/"
