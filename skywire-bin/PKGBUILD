@@ -4,7 +4,7 @@ _pkgname=${pkgname/-bin/}
 _githuborg=skycoin
 pkgdesc="Skywire: Building a new Internet. Skycoin.com"
 pkgver='1.3.52'
-pkgrel='1'
+pkgrel='2'
 _rc=''
 #_rc='-pr1'
 _pkgver="${pkgver}${_rc}"
@@ -172,9 +172,18 @@ install -Dm644 "${srcdir}/${_skywirebin}skywire.tmpfiles" "${_pkgdir}/usr/lib/tm
 # the .pacnew on upgrades, so operators always merge against the
 # current canonical version. The backup= line preserves their
 # in-place edits across upgrades.
+#
+# Invoke the unpacked release binary directly, NOT the
+# ${GOBIN}/skywire-cli shim — the shim execs /opt/skywire/bin/skywire
+# (the post-install location), which doesn't exist during package()
+# on a clean system. The build host happens to work when a previous
+# skywire-bin install left that path in place, but a fresh
+# yay/makepkg run on a new machine fails with `No such file or
+# directory`. The actual binary is already in $srcdir as
+# ${GOBIN}/skywire from the source tarball.
 _msg3 'skywire.conf → /etc/skywire.conf (canonical template via cli config gen -q)'
 mkdir -p "${_pkgdir}/etc"
-"${GOBIN}/skywire-cli" config gen -q > "${_pkgdir}/etc/skywire.conf"
+"${GOBIN}/skywire" cli config gen -q > "${_pkgdir}/etc/skywire.conf"
 chmod 640 "${_pkgdir}/etc/skywire.conf"
 
 _msg2 'installing desktop files and icons'
