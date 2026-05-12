@@ -6,8 +6,7 @@ Wants=network-online.target
 
 [Service]
 Type=forking
-Environment="SYSTEMDCHILD=1"
-ExecStart=/usr/bin/skywire-autoconfig
+ExecStart=/usr/bin/skywire autoconfig
 
 [Install]
 WantedBy=multi-user.target
