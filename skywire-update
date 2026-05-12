@@ -69,7 +69,16 @@ CURRENT=$(skywire -b 2>/dev/null | grep -oP 'v.*-\K[a-f0-9]+' || echo "none")
 if [ "$TARGET" = "develop" ] || [ "$TARGET" = "latest" ]; then
     _goproxy_env="GOPROXY=direct"
     [ "$GOPROXY_MODE" = "proxy" ] && _goproxy_env=""
-    PROXY_VERSION=$(cd /tmp && env $_goproxy_env go list -m -json "github.com/skycoin/skywire@${TARGET}" 2>/dev/null \
+    # Run as BUILD_USER with proper GOPATH/GOCACHE. Previously this
+    # ran as root with no GOPATH, which caused `go list -m -json` to
+    # fail silently (2>/dev/null swallows the error), leaving
+    # PROXY_VERSION empty. The early-exit was then skipped and the
+    # install + restart fired every cycle even when develop HEAD was
+    # unchanged — visible as repeated "Updating: <hash> -> develop"
+    # log lines with the same hash on each side of the arrow.
+    PROXY_VERSION=$(runuser -u "$BUILD_USER" -- env \
+        GOPATH="$BUILD_GOPATH" GOCACHE="$BUILD_GOCACHE" $_goproxy_env \
+        go list -m -json "github.com/skycoin/skywire@${TARGET}" 2>/dev/null \
         | grep -oP '"Version":\s*"v[^"]*-\K[a-f0-9]+' || echo "")
     if [ -n "$PROXY_VERSION" ] && [ "$PROXY_VERSION" = "$CURRENT" ]; then
         echo "Skywire is up to date at $CURRENT"
@@ -93,6 +102,17 @@ runuser -u "$BUILD_USER" -- env \
     GOFLAGS=-trimpath \
     $_goproxy_build \
     go install "github.com/skycoin/skywire@${TARGET}"
+
+# Defense in depth: even if the early-exit above missed the no-op
+# case (network glitch on the resolver, regex drift, etc.), don't
+# install + restart when the freshly-built binary reports the same
+# SHA as what's running. `skywire -b` works the same regardless of
+# the binary path, so we can compare directly without copying first.
+NEW=$("${BUILD_GOPATH}/bin/skywire" -b 2>/dev/null | grep -oP 'v.*-\K[a-f0-9]+' || echo "")
+if [ -n "$NEW" ] && [ "$NEW" = "$CURRENT" ]; then
+    echo "Build produced no commit change (still $CURRENT) — skipping install + restart"
+    exit 0
+fi
 
 # Install as root
 install -Dm755 "${BUILD_GOPATH}/bin/skywire" /opt/skywire/bin/skywire
