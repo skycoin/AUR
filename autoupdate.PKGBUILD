@@ -18,7 +18,7 @@ _scripts=("skywire-update" "skywire-docker-update")
 _services=("skywire-update.service" "skywire-docker-update.service")
 _timers=("skywire-update.timer" "skywire-docker-update.timer")
 source=("${_scripts[@]}" "${_services[@]}" "${_timers[@]}")
-sha256sums=('f00ea05f61f3c058030c9a9cb2e27401de307b195b354842511de78348235b28'
+sha256sums=('8619a49b9c453e7f884ee901e77eb34e7b56d4db8a2583ef46d2904022bfd0dd'
             '56a9ef48e2b4012dcfab02ef01cee5e8b92af116c5c711a27ca3dcde702ae0ea'
             '2623526259755c4979fa7eefdbc0dee74cad7b4526735a14de608dafb4fe274d'
             '45c5cdd73839e6eae9fbda46377a5447353f315821de4707a004de1c52099b80'
