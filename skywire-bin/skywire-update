@@ -82,10 +82,18 @@ if [ "$TARGET" = "develop" ] || [ "$TARGET" = "latest" ]; then
     # install + restart fired every cycle even when develop HEAD was
     # unchanged — visible as repeated "Updating: <hash> -> develop"
     # log lines with the same hash on each side of the arrow.
+    # Capture the FULL version string ("v1.3.54-0.<timestamp>-<hash>"),
+    # not just the trailing commit hash. CURRENT comes from "skywire -b"
+    # as the complete version line; comparing hash-suffix-only against
+    # the full string was always inequal, so the early-exit never fired
+    # and we paid a full rebuild every tick. The post-build NEW==CURRENT
+    # check on the install side correctly bails, so this is purely a
+    # CPU/IO waste fix — but on hosts with a short OnCalendar override
+    # (e.g. */5min), the wasted rebuilds add up.
     PROXY_VERSION=$(runuser -u "$BUILD_USER" -- env \
         GOPATH="$BUILD_GOPATH" GOCACHE="$BUILD_GOCACHE" $_goproxy_env \
         go list -m -json "github.com/skycoin/skywire@${TARGET}" 2>/dev/null \
-        | grep -oP '"Version":\s*"v[^"]*-\K[a-f0-9]+' || echo "")
+        | grep -oP '"Version":\s*"\K[^"]+' || echo "")
     if [ -n "$PROXY_VERSION" ] && [ "$PROXY_VERSION" = "$CURRENT" ]; then
         echo "Skywire is up to date at $CURRENT"
         exit 0
