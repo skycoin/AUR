@@ -4,7 +4,7 @@ _pkgname=${pkgname/-bin/}
 _githuborg=skycoin
 pkgdesc="Skywire: Building a new Internet. Skycoin.com"
 pkgver='1.3.53'
-pkgrel='6'
+pkgrel='7'
 _rc=''
 #_rc='-pr1'
 _pkgver="${pkgver}${_rc}"
@@ -173,18 +173,28 @@ install -Dm644 "${srcdir}/${_skywirebin}skywire.tmpfiles" "${_pkgdir}/usr/lib/tm
 # current canonical version. The backup= line preserves their
 # in-place edits across upgrades.
 #
-# Invoke the unpacked release binary directly, NOT the
-# ${GOBIN}/skywire-cli shim — the shim execs /opt/skywire/bin/skywire
-# (the post-install location), which doesn't exist during package()
-# on a clean system. The build host happens to work when a previous
-# skywire-bin install left that path in place, but a fresh
-# yay/makepkg run on a new machine fails with `No such file or
-# directory`. The actual binary is already in $srcdir as
-# ${GOBIN}/skywire from the source tarball.
+# Canonical /etc/skywire.conf via `cli config gen -q`.
+#
+# Two execution contexts. The regular AUR PKGBUILD path runs
+# _package once with GOBIN pointing at the host-arch binary that
+# pacman extracted from $srcdir — direct execution always works.
+#
+# cc.deb.PKGBUILD iterates ALL target arches, extracting each
+# tarball into ${pkgdir}/test/ and pointing GOBIN at that per-arch
+# binary; running `skywire cli config gen` against an arm64 binary
+# on an amd64 host fails with 'Exec format error'. To support
+# cross-arch packaging, cc.deb.PKGBUILD pre-generates the config
+# ONCE up front using the host-native binary and writes it to
+# ${srcdir}/skywire.conf.generated; we install that when present.
+# The text is arch-independent so one pass covers every target.
 _msg3 'skywire.conf → /etc/skywire.conf (canonical template via cli config gen -q)'
 mkdir -p "${_pkgdir}/etc"
-"${GOBIN}/skywire" cli config gen -q > "${_pkgdir}/etc/skywire.conf"
-chmod 640 "${_pkgdir}/etc/skywire.conf"
+if [[ -f "${srcdir}/skywire.conf.generated" ]] ; then
+  install -m640 "${srcdir}/skywire.conf.generated" "${_pkgdir}/etc/skywire.conf"
+else
+  "${GOBIN}/skywire" cli config gen -q > "${_pkgdir}/etc/skywire.conf"
+  chmod 640 "${_pkgdir}/etc/skywire.conf"
+fi
 
 _msg2 'installing desktop files and icons'
 mkdir -p "${_pkgdir}/usr/share/applications/" "${_pkgdir}/usr/share/icons/hicolor/48x48/apps/"

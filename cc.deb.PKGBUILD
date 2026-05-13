@@ -151,6 +151,33 @@ POSTRM_EOF
 
 package() {
 
+# Generate the canonical /etc/skywire.conf ONCE using the build
+# host's native binary. The per-arch loop below extracts each
+# arch's binary into ${pkgdir}/test/ and points GOBIN at it, but
+# those binaries can't be executed on a cross-arch build host
+# (e.g. amd64 packaging arm64 → 'Exec format error'). The generated
+# config text is arch-independent, so one host-native pass is
+# enough and the per-arch loop just installs the cached file via
+# _package's PKGBUILD-shared logic.
+local _host_arch
+_host_arch="$(dpkg --print-architecture 2>/dev/null || uname -m)"
+local _host_pkgarch1
+case "${_host_arch}" in
+  x86_64|amd64)   _host_pkgarch1=amd64 ;;
+  aarch64|arm64)  _host_pkgarch1=arm64 ;;
+  armv7l|armhf|armel|arm)  _host_pkgarch1=arm ;;
+  i686|i386)      _host_pkgarch1=386 ;;
+  riscv64)        _host_pkgarch1=riscv64 ;;
+  *)              _host_pkgarch1=amd64 ;;
+esac
+local _host_archive="${_pkgname}-${_tag_ver}-linux-${_host_pkgarch1}.tar.gz"
+local _host_tmpdir
+_host_tmpdir="$(mktemp -d)"
+tar -xf "${srcdir}/${_host_archive}" -C "${_host_tmpdir}"
+"${_host_tmpdir}/skywire" cli config gen -q > "${srcdir}/skywire.conf.generated"
+chmod 640 "${srcdir}/skywire.conf.generated"
+rm -rf "${_host_tmpdir}"
+
 for _i in "${_pkgarches[@]}"; do
 _msg2 "_pkgarch=${_i}"
 local _pkgarch="${_i}"
