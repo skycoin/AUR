@@ -23,7 +23,7 @@ backup=("opt/${_pkgname}/users.db" "opt/${_pkgname}/skywire.json" "opt/${_pkgnam
 #_script=("skywire-autoconfig")
 _desktop=("skywire.desktop" "skywirevpn.desktop")
 _icon=("skywirevpn.png" "skywire.png")
-_service=("skywire.service" "skywire-autoconfig.service" "skywire-sn.service" "skywire-ar.service" "skywire-rf.service" "skywire-tpd.service" "skywire-dmsgd.service" "skywire-dmsg.service" "skywire-sd.service")
+_service=("skywire.service" "skywire-autoconfig.service" "skywire-sn.service" "skywire-ar.service" "skywire-rf.service" "skywire-tpd.service" "skywire-dmsgd.service" "skywire-dmsg.service" "skywire-sd.service" "dmsgpty-tcp.socket" "dmsgpty-tcp@.service")
 _userservice=("skywire-user.service")
 # sysusers.d / tmpfiles.d declare the _skywire service user and the
 # directories it owns. Pacman's systemd hooks run systemd-sysusers
@@ -60,6 +60,8 @@ sha256sums=('40c80ccce9e89ae559050b943be1f09d905476c614a72d74fac2a58c821ac058'
             'ea6001f9dea428a6bd877676b42a2c7d6acdd36124eab2ec9d980645a55a115c'
             '0a24b82c6ac7775b541af426912091fecb34ad5cd9e741a8c6de3ac1c0ee3218'
             '03ee60eecd19c5d5260f3ae40f535c20488f045fea2f8d72d76f2778b6470809'
+            'a7b8ae8fdd1c0410402cb732a2c5adc5c8dc948f5f8721efa08a77bf1b9216cb'
+            'ec60e0934b2a842d8609e876b53257f38084d6f02ba05aee5d37b29e8c00eda2'
             '483353f172cb12c8d726dce8e0cd284ff6bf6a69b2912274559bc199b1c7f3e3'
             '60cd97d7ff821f793de68f38aad4468fc83fcddf31449397227d16a746cc8a92'
             '2f1511abbd2b42f4bfebf2a872295de5992fe98d81163ac9ab7744d61608af5e'
