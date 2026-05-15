@@ -47,8 +47,8 @@ _build() {
 _msg2 "go install -trimpath --ldflags=\"\" --ldflags \" -s -w -linkmode external -extldflags '-static' -buildid=\" github.com/skycoin/skywire/cmd/skywire@develop"
 go install -trimpath --ldflags="" --ldflags " -s -w -linkmode external -extldflags '-static' -buildid=" github.com/skycoin/skywire/cmd/skywire@v${pkgver}
 _msg2 'creating launcher scripts'
-echo -e '#!/bin/bash\n/opt/skywire/bin/skywire cli $@' > "${GOBIN}/skywire-cli"
-echo -e '#!/bin/bash\n/opt/skywire/bin/skywire visor $@' > "${GOBIN}/skywire-visor"
+echo -e '#!/bin/bash\nexec /opt/skywire/bin/skywire cli "$@"' > "${GOBIN}/skywire-cli"
+echo -e '#!/bin/bash\nexec /opt/skywire/bin/skywire visor "$@"' > "${GOBIN}/skywire-visor"
 #binary transparency
 cd "$GOBIN" || exit
 _msg2 'binary sha256sum'
