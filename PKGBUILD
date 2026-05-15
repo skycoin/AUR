@@ -103,10 +103,10 @@ _build() {
   _GOAPPS="${GOBIN}/apps"
   mkdir -p ${_GOAPPS}
   _msg2 'creating launcher scripts'
-  echo -e '#!/bin/bash\n/opt/skywire/bin/skywire $@' > "${_GOAPPS}/skywire"
+  echo -e '#!/bin/bash\nexec /opt/skywire/bin/skywire "$@"' > "${_GOAPPS}/skywire"
   chmod +x ${_GOAPPS}/*
-  echo -e '#!/bin/bash\n/opt/skywire/bin/skywire cli $@' > "${GOBIN}/skywire-cli"
-  echo -e '#!/bin/bash\n/opt/skywire/bin/skywire visor $@' > "${GOBIN}/skywire-visor"
+  echo -e '#!/bin/bash\nexec /opt/skywire/bin/skywire cli "$@"' > "${GOBIN}/skywire-cli"
+  echo -e '#!/bin/bash\nexec /opt/skywire/bin/skywire visor "$@"' > "${GOBIN}/skywire-visor"
   chmod +x ${GOBIN}/*
 
 }
