@@ -37,6 +37,19 @@ post_install() {
 
 post_upgrade() {
   post_install
+  # On upgrade, restart every package-shipped service that's
+  # currently active. try-restart is a noop on inactive units, so
+  # operators who haven't enabled every shipped unit don't see
+  # spurious starts. autoconfig already touched skywire.service via
+  # its restart-if-active path; try-restart on a just-restarted
+  # service is harmless.
+  for _unit in skywire.service skywire-autoconfig.service \
+               skywire-sn.service skywire-ar.service \
+               skywire-rf.service skywire-tpd.service \
+               skywire-dmsgd.service skywire-dmsg.service \
+               skywire-sd.service ; do
+    systemctl try-restart "$_unit" 2>/dev/null || true
+  done
 }
 
 pre-remove() {
