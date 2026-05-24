@@ -17,6 +17,12 @@ post_install() {
   # systemd-sysusers and systemd-tmpfiles --create when the package
   # lands these files.
 
+  # Generate the canonical /etc/skywire.conf template ONLY if it's
+  # missing. Operator edits (SK, HYPERVISORPKS, SKYWIRE_USER, etc.)
+  # are preserved by default across upgrades because the package no
+  # longer ships the file — pacman has nothing to overwrite.
+  [[ ! -f /etc/skywire.conf ]] && skywire cli config gen -pqQ /etc/skywire.conf
+
   # Run the Go-side autoconfig (which now reads /etc/skywire.conf
   # for PKGENV/USRENV/SKYWIRE_USER) instead of the legacy bash
   # autoconfig. The shell wrapper still ships at
