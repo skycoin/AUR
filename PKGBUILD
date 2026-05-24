@@ -33,14 +33,18 @@ _userservice=("skywire-user.service")
 # template, and `skywire autoconfig`.
 _sysusers=("skywire.sysusers")
 _tmpfiles=("skywire.tmpfiles")
-_etcconf=("skywire.conf")
+# /etc/skywire.conf is intentionally NOT shipped by the package.
+# The .install hook generates it on first install only, via
+# `skywire cli config gen -pqQ`, and never touches it on upgrade
+# so operator edits persist. The 28-line hand-maintained stub
+# that used to live here as _etcconf+source has been removed —
+# the dynamic template is 276 lines and covers every knob.
 _source=("${_desktop[@]}"
 "${_icon[@]}"
 "${_service[@]}"
 "${_userservice[@]}"
 "${_sysusers[@]}"
 "${_tmpfiles[@]}"
-"${_etcconf[@]}"
 "${_key[@]}")
 #"https://raw.githubusercontent.com/skycoin/skywire/develop/dmsghttp-config.json"
 #"https://raw.githubusercontent.com/skycoin/skywire/develop/services-config.json")

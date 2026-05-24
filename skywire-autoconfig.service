@@ -1,11 +1,18 @@
 [Unit]
 Description=skywire-autoconfig
-After=systemd-networkd.service network.target armbian-firstrun.service armbian-resize-filesystem.service systemd-user-sessions.service network-online.target systend-networkd-wait-online.service NetworkManager-wait-online.service
+After=systemd-networkd.service network.target armbian-firstrun.service armbian-resize-filesystem.service systemd-user-sessions.service network-online.target systemd-networkd-wait-online.service NetworkManager-wait-online.service
 Before=skywire.service
 Wants=network-online.target
 
 [Service]
-Type=forking
+# `skywire autoconfig` runs to completion synchronously — write
+# /etc/skywire.conf if missing, regenerate /opt/skywire/skywire.json
+# with -r retention, restart skywire.service if active, exit. There
+# is no daemon to fork off; Type=forking was wrong (systemd would
+# either wait indefinitely for a fork that never happens or
+# misjudge service state).
+Type=oneshot
+RemainAfterExit=no
 ExecStart=/usr/bin/skywire autoconfig
 
 [Install]

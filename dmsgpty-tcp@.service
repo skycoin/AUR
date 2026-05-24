@@ -15,7 +15,12 @@ After=network-online.target
 # Edit --sk-from-visor to point at your skywire-config.json. The
 # whitelist is read from /etc/skywire/dmsgpty.json by default; pass
 # --confpath to override.
-ExecStart=/usr/bin/dmsgpty-host \
+# The unified skywire binary supersedes the separate dmsgpty-host
+# binary that used to live at /usr/bin/dmsgpty-host. `skywire dmsg
+# pty host` carries the same flag surface (--no-dmsg,
+# --sk-from-visor, --confpath, --listen-fd) so socket-activation
+# semantics are unchanged.
+ExecStart=/usr/bin/skywire dmsg pty host \
     --no-dmsg \
     --sk-from-visor /etc/skywire/skywire-config.json \
     --confpath /etc/skywire/dmsgpty.json \
