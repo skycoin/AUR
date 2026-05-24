@@ -65,87 +65,13 @@ build() {
     echo "Maintainer: ${_githuborg}" >> ${srcdir}/${_pkgarch}.control
     echo "Description: ${pkgdesc}" >> ${srcdir}/${_pkgarch}.control
   done
-  # Postinst mirrors skywire.install's post_install. systemd-sysusers
-  # and systemd-tmpfiles do the heavy lifting (user creation, dir
-  # ownership, /opt/skywire chown via the `Z` recursive-adjust line)
-  # — this PKGBUILD doesn't use debhelper, so we call them
-  # explicitly. Both are idempotent.
-  cat > "${srcdir}/postinst.sh" <<'POSTINST_EOF'
-#!/bin/bash
-set -e
-
-# Process the sysusers.d / tmpfiles.d files we shipped, so the
-# _skywire user exists and /opt/skywire is owned by them BEFORE
-# autoconfig runs and tries to write into the dir. systemd-sysusers
-# creates the user; systemd-tmpfiles --create applies the d/Z lines.
-if command -v systemd-sysusers >/dev/null 2>&1 ; then
-  systemd-sysusers /usr/lib/sysusers.d/skywire.conf 2>/dev/null || true
-fi
-if command -v systemd-tmpfiles >/dev/null 2>&1 ; then
-  systemd-tmpfiles --create /usr/lib/tmpfiles.d/skywire.conf 2>/dev/null || true
-fi
-
-# File caps for VPN apps + low-port hypervisor binds. Survives
-# User= changes; required for the user-mode unit (which can't be
-# granted ambient caps).
-if command -v setcap >/dev/null 2>&1 ; then
-  setcap 'cap_net_admin,cap_net_bind_service+eip' /opt/skywire/bin/skywire 2>/dev/null || true
-fi
-
-skywire autoconfig
-POSTINST_EOF
-  # prerm: stop the daemon. State-bearing paths under /opt/skywire
-  # (skywire.json — visor identity / SK, users.db — hv accounts,
-  # local/* — stats, logs, treestore) must SURVIVE upgrades. The
-  # previous unconditional `rm -rf /opt/skywire` caused every
-  # `apt upgrade skywire-bin` to silently rotate the visor's SK
-  # because the new postinst's `skywire autoconfig` then ran
-  # `cli config gen -r` against an empty path, which can't preserve
-  # keys it can't read. State teardown moved to a postrm that only
-  # fires on $1=purge.
-  cat > "${srcdir}/prerm.sh" <<'PRERM_EOF'
-#!/bin/bash
-set -e
-case "$1" in
-    remove|deconfigure)
-        # Genuine uninstall. Stop and disable the unit but leave
-        # /opt/skywire alone: an operator running `apt remove`
-        # (not `apt purge`) may reinstall later and expect their
-        # identity / hypervisor accounts intact. postrm with
-        # $1=purge is where the actual nuke happens.
-        systemctl stop skywire.service 2>/dev/null || true
-        systemctl disable skywire.service 2>/dev/null || true
-        ;;
-    upgrade|failed-upgrade)
-        # New binaries about to unpack over us. Stop the daemon so
-        # the new files aren't held open, but DO NOT touch state
-        # under /opt/skywire — autoconfig's gen -r in postinst will
-        # then preserve the existing SK / accounts / settings.
-        systemctl stop skywire.service 2>/dev/null || true
-        ;;
-esac
-PRERM_EOF
-  # postrm: only purge nukes state. `apt remove` is recoverable;
-  # `apt purge` is the explicit "I'm done with this for good"
-  # signal. Drop-in cleanup also belongs here, not prerm, so
-  # upgrades don't tear it down between the old prerm and the new
-  # postinst.
-  cat > "${srcdir}/postrm.sh" <<'POSTRM_EOF'
-#!/bin/bash
-set -e
-case "$1" in
-    purge)
-        rm -rf /opt/skywire
-        rm -f /etc/systemd/system/skywire.service.d/skywire-user.conf
-        rmdir --ignore-fail-on-non-empty /etc/systemd/system/skywire.service.d 2>/dev/null || true
-        ;;
-    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
-        # nothing: keep state for possible reinstall, and let the
-        # in-progress upgrade complete normally.
-        ;;
-esac
-systemctl daemon-reload 2>/dev/null || true
-POSTRM_EOF
+  # Generate the deb install scripts via the shared helper from
+  # PKGBUILD. Writes ${srcdir}/postinst.sh, prerm.sh, postrm.sh —
+  # source of truth lives in PKGBUILD (mirrored in
+  # skywire/PKGBUILD); the other consumer is skywire/deb.PKGBUILD.
+  # See PKGBUILD::_gen_deb_scripts for the script bodies and the
+  # SK-preservation rationale around prerm/postrm being case-aware.
+  _gen_deb_scripts
   _build
 }
 
