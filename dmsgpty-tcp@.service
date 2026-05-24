@@ -12,18 +12,23 @@ After=network-online.target
 # share the visor's identity via --sk-from-visor without contending
 # for the visor's dmsg-discovery entry.
 #
-# Edit --sk-from-visor to point at your skywire-config.json. The
-# whitelist is read from /etc/skywire/dmsgpty.json by default; pass
-# --confpath to override.
+# Paths match the skywire-bin package layout. Edit if your install
+# uses non-default locations:
+#   /opt/skywire/skywire.json  — visor config; --sk-from-visor reads
+#                                 its .sk field for the host identity
+#   /opt/skywire/dmsgpty.json  — host whitelist + daemon settings;
+#                                 auto-generated below if missing
+#
 # The unified skywire binary supersedes the separate dmsgpty-host
 # binary that used to live at /usr/bin/dmsgpty-host. `skywire dmsg
 # pty host` carries the same flag surface (--no-dmsg,
 # --sk-from-visor, --confpath, --listen-fd) so socket-activation
 # semantics are unchanged.
+ExecStartPre=/bin/bash -c '[[ -f /opt/skywire/dmsgpty.json ]] || /usr/bin/skywire dmsg pty host confgen /opt/skywire/dmsgpty.json'
 ExecStart=/usr/bin/skywire dmsg pty host \
     --no-dmsg \
-    --sk-from-visor /etc/skywire/skywire-config.json \
-    --confpath /etc/skywire/dmsgpty.json \
+    --sk-from-visor /opt/skywire/skywire.json \
+    --confpath /opt/skywire/dmsgpty.json \
     --listen-fd 0
 StandardInput=socket
 StandardOutput=journal
