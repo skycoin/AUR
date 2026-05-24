@@ -20,6 +20,12 @@ post_install() {
   # /usr/lib/tmpfiles.d/skywire.conf. systemd-sysusers and
   # systemd-tmpfiles run on every install and at boot.
 
+  # Generate the canonical /etc/skywire.conf template ONLY if it's
+  # missing. Operator edits (SK, HYPERVISORPKS, SKYWIRE_USER, etc.)
+  # are preserved by default across upgrades because the package no
+  # longer ships the file — pacman has nothing to overwrite.
+  [[ ! -f /etc/skywire.conf ]] && skywire cli config gen -pqQ /etc/skywire.conf
+
   skywire autoconfig
 }
 

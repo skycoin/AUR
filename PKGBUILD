@@ -19,7 +19,7 @@ optdepends=('redis: required by address-resolver transport-discovery dmsg-discov
 'jq: config generation for setup-node.service')
 license=('license-free')
 install=skywire.install
-backup=("opt/${_pkgname}/users.db" "opt/${_pkgname}/skywire.json" "opt/${_pkgname}/local" "etc/skywire.conf")
+backup=("opt/${_pkgname}/users.db" "opt/${_pkgname}/skywire.json" "opt/${_pkgname}/local")
 #_script=("skywire-autoconfig")
 _desktop=("skywire.desktop" "skywirevpn.desktop")
 _icon=("skywirevpn.png" "skywire.png")
@@ -167,36 +167,15 @@ _msg2 'Installing sysusers.d / tmpfiles.d (declarative user + dirs)'
 install -Dm644 "${srcdir}/${_skywirebin}skywire.sysusers" "${_pkgdir}/usr/lib/sysusers.d/skywire.conf"
 install -Dm644 "${srcdir}/${_skywirebin}skywire.tmpfiles" "${_pkgdir}/usr/lib/tmpfiles.d/skywire.conf"
 
-# Default /etc/skywire.conf — generated at package time via
-# `skywire cli config gen -q` so the canonical template (with every
-# knob and its default) is what lands in the package, instead of a
-# hand-maintained snapshot that drifts. Same file is the source of
-# the .pacnew on upgrades, so operators always merge against the
-# current canonical version. The backup= line preserves their
-# in-place edits across upgrades.
-#
-# Canonical /etc/skywire.conf via `cli config gen -q`.
-#
-# Two execution contexts. The regular AUR PKGBUILD path runs
-# _package once with GOBIN pointing at the host-arch binary that
-# pacman extracted from $srcdir — direct execution always works.
-#
-# cc.deb.PKGBUILD iterates ALL target arches, extracting each
-# tarball into ${pkgdir}/test/ and pointing GOBIN at that per-arch
-# binary; running `skywire cli config gen` against an arm64 binary
-# on an amd64 host fails with 'Exec format error'. To support
-# cross-arch packaging, cc.deb.PKGBUILD pre-generates the config
-# ONCE up front using the host-native binary and writes it to
-# ${srcdir}/skywire.conf.generated; we install that when present.
-# The text is arch-independent so one pass covers every target.
-_msg3 'skywire.conf → /etc/skywire.conf (canonical template via cli config gen -q)'
-mkdir -p "${_pkgdir}/etc"
-if [[ -f "${srcdir}/skywire.conf.generated" ]] ; then
-  install -m640 "${srcdir}/skywire.conf.generated" "${_pkgdir}/etc/skywire.conf"
-else
-  "${GOBIN}/skywire" cli config gen -q > "${_pkgdir}/etc/skywire.conf"
-  chmod 640 "${_pkgdir}/etc/skywire.conf"
-fi
+# /etc/skywire.conf is INTENTIONALLY not shipped by the package.
+# The postinst (deb) and post_install (arch) hooks generate it on
+# first install via `skywire cli config gen -pqQ /etc/skywire.conf`,
+# but only if it's missing — so operator edits survive upgrades
+# without a conffile / .pacnew dance. Avoids the cross-arch
+# packaging headache too (cc.deb.PKGBUILD used to pre-generate the
+# template host-natively and stash it as
+# ${srcdir}/skywire.conf.generated to work around the inability to
+# exec a foreign-arch binary on the build host).
 
 _msg2 'installing desktop files and icons'
 mkdir -p "${_pkgdir}/usr/share/applications/" "${_pkgdir}/usr/share/icons/hicolor/48x48/apps/"
@@ -263,6 +242,12 @@ fi
 if command -v setcap >/dev/null 2>&1 ; then
   setcap 'cap_net_admin,cap_net_bind_service+eip' /opt/skywire/bin/skywire 2>/dev/null || true
 fi
+
+# Generate the canonical /etc/skywire.conf template ONLY if it's
+# missing. Operator edits (SK, HYPERVISORPKS, SKYWIRE_USER, etc.)
+# are preserved by default across upgrades because the package no
+# longer ships the file — there's nothing for dpkg to overwrite.
+[[ ! -f /etc/skywire.conf ]] && skywire cli config gen -pqQ /etc/skywire.conf
 
 skywire autoconfig
 POSTINST_EOF
