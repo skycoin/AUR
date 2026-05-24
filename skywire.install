@@ -47,7 +47,7 @@ post_upgrade() {
                skywire-sn.service skywire-ar.service \
                skywire-rf.service skywire-tpd.service \
                skywire-dmsgd.service skywire-dmsg.service \
-               skywire-sd.service ; do
+               skywire-sd.service dmsgpty-tcp.socket ; do
     systemctl try-restart "$_unit" 2>/dev/null || true
   done
 }
