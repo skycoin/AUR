@@ -1,7 +1,7 @@
 pkgbase = skywire-bin
 	pkgdesc = Skywire: Building a new Internet. Skycoin.com
 	pkgver = 1.3.54
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/skycoin/skywire
 	install = skywire.install
 	arch = i686
@@ -24,7 +24,6 @@ pkgbase = skywire-bin
 	backup = opt/skywire/users.db
 	backup = opt/skywire/skywire.json
 	backup = opt/skywire/local
-	backup = etc/skywire.conf
 	source = skywire.desktop
 	source = skywirevpn.desktop
 	source = skywirevpn.png
