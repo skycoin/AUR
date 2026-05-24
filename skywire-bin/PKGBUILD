@@ -250,6 +250,20 @@ fi
 [[ ! -f /etc/skywire.conf ]] && skywire cli config gen -pqQ /etc/skywire.conf
 
 skywire autoconfig
+
+# On upgrade, restart every package-shipped service that's
+# currently active. try-restart is a noop on inactive units, so
+# operators who haven't enabled every shipped unit don't see
+# spurious starts. autoconfig already touched skywire.service via
+# its restart-if-active path; try-restart on a just-restarted
+# service is harmless.
+for _unit in skywire.service skywire-autoconfig.service \
+             skywire-sn.service skywire-ar.service \
+             skywire-rf.service skywire-tpd.service \
+             skywire-dmsgd.service skywire-dmsg.service \
+             skywire-sd.service dmsgpty-tcp.socket ; do
+    systemctl try-restart "$_unit" 2>/dev/null || true
+done
 POSTINST_EOF
 
   cat > "${srcdir}/prerm.sh" <<'PRERM_EOF'
@@ -257,20 +271,25 @@ POSTINST_EOF
 set -e
 case "$1" in
     remove|deconfigure)
-        # Genuine uninstall. Stop and disable the unit but leave
+        # Genuine uninstall. Stop and disable the units but leave
         # /opt/skywire alone: an operator running `apt remove`
         # (not `apt purge`) may reinstall later and expect their
         # identity / hypervisor accounts intact. postrm with
         # $1=purge is where the actual nuke happens.
-        systemctl stop skywire.service 2>/dev/null || true
-        systemctl disable skywire.service 2>/dev/null || true
+        for _unit in skywire.service skywire-autoconfig.service \
+                     skywire-sn.service skywire-ar.service \
+                     skywire-rf.service skywire-tpd.service \
+                     skywire-dmsgd.service skywire-dmsg.service \
+                     skywire-sd.service dmsgpty-tcp.socket ; do
+            systemctl stop "$_unit" 2>/dev/null || true
+            systemctl disable "$_unit" 2>/dev/null || true
+        done
         ;;
     upgrade|failed-upgrade)
-        # New binaries about to unpack over us. Stop the daemon so
-        # the new files aren't held open, but DO NOT touch state
-        # under /opt/skywire — autoconfig's gen -r in postinst will
-        # then preserve the existing SK / accounts / settings.
-        systemctl stop skywire.service 2>/dev/null || true
+        # No-op on upgrade. dpkg replaces files via unlink+rename,
+        # so running processes keep the old binary inode mapped
+        # until postinst's try-restart loop picks them up on the
+        # new binary.
         ;;
 esac
 PRERM_EOF
