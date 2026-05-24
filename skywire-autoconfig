@@ -200,7 +200,12 @@ _msg2 "Configuring skywire"
 _config_gen
 _svc=skywire
 [[ $SKYBIAN == "true" ]] && { _msg3 "Enabling ${_svc} service${_now/--/ and starting }..\n    systemctl enable ${_now} ${_svc}.service" ; systemctl enable ${_now} ${_svc}.service 2> /dev/null ; }
-[[ $DMSGPTYTERM == "1" ]] && { [[ ${_now} != "--now" ]] && { _msg3 "Please restart ${_svc} service manually:\n		${_red}systemctl restart ${_svc} 2> /dev/null${_nc}" ; exit 0 ; } || { _msg3 "Please shut down your visor and start it again with:\n		${_red}systemctl start ${_svc} 2> /dev/null${_nc}" ; exit 0 ; } ; }
+# DMSGPTYTERM=1 check removed. The dmsgpty UI no longer exports it,
+# and the documented way to install without auto-restarting the
+# service from inside a dmsgpty session is `NOAUTOCONFIG=true yay -S
+# skywire-bin` (deb: `NOAUTOCONFIG=true apt install skywire-bin`)
+# followed by `systemctl start skywire-autoconfig.service` from
+# outside the pty.
 #restart the service
 	systemctl is-active --quiet ${_svc} && _msg3 "Restarting skywire.service..." && systemctl restart ${_svc} 2> /dev/null
 ! systemctl is-active --quiet ${_svc} >/dev/null && { _msg2 "Start the skywire service with:\n	${_red}systemctl start ${_svc}${_nc}" ; exit 0 ; }
