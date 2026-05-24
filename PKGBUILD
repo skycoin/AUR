@@ -145,3 +145,86 @@ _msg3() {
 local mesg=$1; shift
 printf "${BLUE}  -->${ALL_OFF} ${mesg}${ALL_OFF}\n" "$@"
 }
+
+# _gen_deb_scripts writes the canonical postinst.sh / prerm.sh /
+# postrm.sh under ${srcdir}/ for deb-package consumption. Shared
+# between skywire/deb.PKGBUILD and skywire-bin/cc.deb.PKGBUILD so
+# the two deb consumers stay in sync. Mirrored verbatim in
+# skywire-bin/PKGBUILD; keep both copies in sync.
+#
+# Idempotent: safe to call multiple times. Writes the same files
+# every time.
+#
+# Semantics (matches skywire.install on the arch side):
+# - postinst: systemd-sysusers + tmpfiles, setcap on the unified
+#   binary, then idempotent `skywire autoconfig` (SK-preserving).
+# - prerm: case-aware. remove|deconfigure stops+disables;
+#   upgrade|failed-upgrade only stops. Never touches /opt/skywire.
+# - postrm: case-aware. Only `purge` nukes /opt/skywire + drop-ins.
+#   remove keeps state for possible reinstall.
+_gen_deb_scripts() {
+  cat > "${srcdir}/postinst.sh" <<'POSTINST_EOF'
+#!/bin/bash
+set -e
+
+# Process the sysusers.d / tmpfiles.d files we shipped, so the
+# _skywire user exists and /opt/skywire is owned by them BEFORE
+# autoconfig runs and tries to write into the dir. systemd-sysusers
+# creates the user; systemd-tmpfiles --create applies the d/Z lines.
+if command -v systemd-sysusers >/dev/null 2>&1 ; then
+  systemd-sysusers /usr/lib/sysusers.d/skywire.conf 2>/dev/null || true
+fi
+if command -v systemd-tmpfiles >/dev/null 2>&1 ; then
+  systemd-tmpfiles --create /usr/lib/tmpfiles.d/skywire.conf 2>/dev/null || true
+fi
+
+# File caps for VPN apps + low-port hypervisor binds. Survives
+# User= changes; required for the user-mode unit (which can't be
+# granted ambient caps).
+if command -v setcap >/dev/null 2>&1 ; then
+  setcap 'cap_net_admin,cap_net_bind_service+eip' /opt/skywire/bin/skywire 2>/dev/null || true
+fi
+
+skywire autoconfig
+POSTINST_EOF
+
+  cat > "${srcdir}/prerm.sh" <<'PRERM_EOF'
+#!/bin/bash
+set -e
+case "$1" in
+    remove|deconfigure)
+        # Genuine uninstall. Stop and disable the unit but leave
+        # /opt/skywire alone: an operator running `apt remove`
+        # (not `apt purge`) may reinstall later and expect their
+        # identity / hypervisor accounts intact. postrm with
+        # $1=purge is where the actual nuke happens.
+        systemctl stop skywire.service 2>/dev/null || true
+        systemctl disable skywire.service 2>/dev/null || true
+        ;;
+    upgrade|failed-upgrade)
+        # New binaries about to unpack over us. Stop the daemon so
+        # the new files aren't held open, but DO NOT touch state
+        # under /opt/skywire — autoconfig's gen -r in postinst will
+        # then preserve the existing SK / accounts / settings.
+        systemctl stop skywire.service 2>/dev/null || true
+        ;;
+esac
+PRERM_EOF
+
+  cat > "${srcdir}/postrm.sh" <<'POSTRM_EOF'
+#!/bin/bash
+set -e
+case "$1" in
+    purge)
+        rm -rf /opt/skywire
+        rm -f /etc/systemd/system/skywire.service.d/skywire-user.conf
+        rmdir --ignore-fail-on-non-empty /etc/systemd/system/skywire.service.d 2>/dev/null || true
+        ;;
+    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        # nothing: keep state for possible reinstall, and let the
+        # in-progress upgrade complete normally.
+        ;;
+esac
+systemctl daemon-reload 2>/dev/null || true
+POSTRM_EOF
+}
