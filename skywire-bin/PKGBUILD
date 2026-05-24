@@ -3,8 +3,8 @@ pkgname=skywire-bin
 _pkgname=${pkgname/-bin/}
 _githuborg=skycoin
 pkgdesc="Skywire: Building a new Internet. Skycoin.com"
-pkgver='1.3.53'
-pkgrel='7'
+pkgver='1.3.54'
+pkgrel='1'
 _rc=''
 #_rc='-pr1'
 _pkgver="${pkgver}${_rc}"
@@ -66,14 +66,14 @@ sha256sums=('40c80ccce9e89ae559050b943be1f09d905476c614a72d74fac2a58c821ac058'
             '60cd97d7ff821f793de68f38aad4468fc83fcddf31449397227d16a746cc8a92'
             '2f1511abbd2b42f4bfebf2a872295de5992fe98d81163ac9ab7744d61608af5e'
             '67211fd86a09a193855a3d6aae224ade46f5fff285691ff6c5705b1be08a9c42')
-sha256sums_i686=('6d6e29c7bba22de10c9c927aaeb662b04e6ac4823e62928c03f3ee3098a3e7c3')
-sha256sums_x86_64=('0fe5f6c56688006b3f63fe6175e50b2748fb147d11f904bccb2067c91b28f25d')
-sha256sums_aarch64=('c70526592a601ac2bdcb91c040510982a6e9957ded84b37dd20b44701ec03002')
-sha256sums_armv8=('c70526592a601ac2bdcb91c040510982a6e9957ded84b37dd20b44701ec03002')
-sha256sums_armv7=('c8d353fdc11a13e8469495a35c642436e4a4f718b3f2956914b8293be5ec342e')
-sha256sums_armv7l=('c8d353fdc11a13e8469495a35c642436e4a4f718b3f2956914b8293be5ec342e')
-sha256sums_armv7h=('c8d353fdc11a13e8469495a35c642436e4a4f718b3f2956914b8293be5ec342e')
-sha256sums_arm=('fdadccd332b1dbeadee8c4e76ccf1ac2f92b547cf41e4d62cffc68ad337a1730')
+sha256sums_i686=('92bc0f2d438fbdb1b8ce781b8812fad3e0eecd72ec6f57efaaa691bd462fc39f')
+sha256sums_x86_64=('3d7687e955de4bb5b421fe8c0e7f76bc448f8fec896fb3c946017282e730bae4')
+sha256sums_aarch64=('faf6d1d1786c2daf8460c4a209467174bd8d7558ce2b193c77c8ecb1116e0821')
+sha256sums_armv8=('faf6d1d1786c2daf8460c4a209467174bd8d7558ce2b193c77c8ecb1116e0821')
+sha256sums_armv7=('c3ca7fff417b7cf023770bd8c58226d2ae5e03bab29cdbe95ffcc966c704f65d')
+sha256sums_armv7l=('c3ca7fff417b7cf023770bd8c58226d2ae5e03bab29cdbe95ffcc966c704f65d')
+sha256sums_armv7h=('c3ca7fff417b7cf023770bd8c58226d2ae5e03bab29cdbe95ffcc966c704f65d')
+sha256sums_arm=('7d235a3e4e5e150f709b9048fc7456fe3645cf53e8b4e1d5c12b68be54603f17')
 #https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-amd64.tar.gz
 #https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-arm64.tar.gz
 #https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-armhf.tar.gz
@@ -229,8 +229,7 @@ printf "${BLUE}  -->${ALL_OFF} ${mesg}${ALL_OFF}\n" "$@"
 # _gen_deb_scripts writes the canonical postinst.sh / prerm.sh /
 # postrm.sh under ${srcdir}/ for deb-package consumption. Shared
 # between skywire/deb.PKGBUILD and skywire-bin/cc.deb.PKGBUILD so
-# the two deb consumers stay in sync. Mirrored verbatim in
-# skywire/PKGBUILD; keep both copies in sync.
+# the two deb consumers stay in sync.
 #
 # Idempotent: safe to call multiple times. Writes the same files
 # every time.
