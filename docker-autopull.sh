@@ -30,3 +30,12 @@ fi
 echo "$(date): Image updated, recreating containers"
 cd "$COMPOSE_DIR"
 docker compose up -d --force-recreate
+
+# Reap dangling images left behind by retag-on-pull. Without this,
+# every successful pull-and-recreate cycle leaves the previous image's
+# layers untagged on disk, eventually filling / with tens of GB of
+# orphaned data. Tagged images and layers still referenced by
+# running/stopped containers are untouched, so this is safe to run
+# unconditionally on every update cycle.
+PRUNED=$(docker image prune -f 2>&1 | tail -n1)
+echo "$(date): $PRUNED"

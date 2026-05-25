@@ -16,7 +16,7 @@ _scripts=("docker-autopull.sh")
 _services=("docker-autopull.service")
 _timers=("docker-autopull.timer")
 source=("${_scripts[@]}" "${_services[@]}" "${_timers[@]}")
-sha256sums=('6d1c41f2cdde08f36ded150390b32cd0e6868ed413fe1c708c9baa6c4e7ccf79'
+sha256sums=('6f7255aee752fe7f888d95e66c49eb706bc7a45566d528de9afe911b1267332f'
             '22c40f57c7ecd3f34758abc89d34164e6e1836d663c34692b2f2938b00cccb71'
             'db7f0de63785507c4e67f0037ef44ca6be00e0b123cc1ac156d52e45c6f867e9')
 
