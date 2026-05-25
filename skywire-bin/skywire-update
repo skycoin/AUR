@@ -134,9 +134,27 @@ install -Dm755 "${BUILD_GOPATH}/bin/skywire" /opt/skywire/bin/skywire
 
 echo "Skywire updated to $SHORT"
 
-# Run autoconfig and restart if running via systemd
+# Run autoconfig unconditionally. It's idempotent — with no flags it
+# only regenerates /opt/skywire/skywire.json from /etc/skywire.conf,
+# which keeps the JSON in sync with the freshly-installed binary's
+# schema. Doesn't write to /etc/skywire.conf without explicit flags
+# (see cmd/skywire/commands/autoconfig.go). Operators who want it
+# suppressed can set NOAUTOCONFIG=true in /etc/skywire.conf — autoconfig
+# bails cleanly on that.
+#
+# Previously this only ran when systemctl is-active matched, which
+# meant dev/custom-supervised setups (the visor running outside
+# systemd) got the new binary on disk but no skywire.json regen.
+# Splitting the conditions lets autoconfig run universally while
+# the systemd restart still only fires when there's an active unit
+# to restart.
+echo "Running autoconfig..."
+skywire autoconfig 2>/dev/null || skywire-autoconfig 2>/dev/null || true
+
+# Restart only if running via systemd. Manually-supervised instances
+# (dev work, custom restart loops) are left untouched — the operator
+# picks up the new binary on their own restart cycle.
 if systemctl is-active --quiet skywire 2>/dev/null; then
-    echo "Running autoconfig and restarting skywire..."
-    skywire autoconfig 2>/dev/null || skywire-autoconfig 2>/dev/null || true
+    echo "Restarting skywire service..."
     systemctl restart skywire
 fi
