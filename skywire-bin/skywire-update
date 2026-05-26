@@ -30,6 +30,55 @@ if ! id "$BUILD_USER" &>/dev/null; then
     exit 1
 fi
 
+# Prune Go caches before exit. Reason: without this, BUILD_HOME
+# grows unbounded — every update writes new build-cache entries
+# under .cache/go-build, and every dep version ever fetched stays
+# in the module cache under go/pkg/mod. Real-world observation:
+# 56 GB accumulated over a year of daily runs on a single host.
+#
+# Policy:
+#   - Build cache + test cache + fuzz cache: always cleaned. They
+#     rebuild incrementally without network, and their contents
+#     are per-build-graph object files that don't carry useful
+#     state between updates. The 13 GB observed in the wild was
+#     almost entirely build cache.
+#   - Module cache: cleaned ONLY when it exceeds MODCACHE_CAP_MB
+#     (default 3000 MB / 3 GB). Below the cap we leave it alone so
+#     successive updates reuse the resolved dep graph and the
+#     network hit is just the delta. At the cap we accept the
+#     re-download cost to keep disk bounded. Operators can tune
+#     the cap via MODCACHE_CAP_MB in /etc/skywire.conf — set to 0
+#     to disable modcache pruning entirely.
+#
+# We run on EVERY exit (success, no-op, failure) so a half-populated
+# cache from an interrupted build still gets cleaned next tick.
+# Errors from `go clean` are swallowed (||true) so the cleanup can't
+# fail the parent script — by the time the trap fires the install +
+# restart is already done.
+MODCACHE_CAP_MB=${MODCACHE_CAP_MB:-3000}
+cleanup_caches() {
+    # Always-clean caches.
+    runuser -u "$BUILD_USER" -- env \
+        GOPATH="$BUILD_GOPATH" GOCACHE="$BUILD_GOCACHE" \
+        go clean -cache -testcache -fuzzcache 2>/dev/null || true
+
+    # Modcache: cap-driven prune.
+    if [ "$MODCACHE_CAP_MB" -gt 0 ] 2>/dev/null; then
+        local _modcache="${BUILD_GOPATH}/pkg/mod"
+        if [ -d "$_modcache" ]; then
+            local _size_mb
+            _size_mb=$(du -sm "$_modcache" 2>/dev/null | cut -f1)
+            if [ -n "$_size_mb" ] && [ "$_size_mb" -gt "$MODCACHE_CAP_MB" ]; then
+                echo "Pruning module cache (${_size_mb} MB > cap ${MODCACHE_CAP_MB} MB)"
+                runuser -u "$BUILD_USER" -- env \
+                    GOPATH="$BUILD_GOPATH" GOCACHE="$BUILD_GOCACHE" \
+                    go clean -modcache 2>/dev/null || true
+            fi
+        fi
+    fi
+}
+trap cleanup_caches EXIT
+
 # Resolve the target commit
 case "$UPDATE_CHANNEL" in
   stable)
