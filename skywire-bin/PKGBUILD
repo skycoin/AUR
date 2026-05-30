@@ -3,7 +3,7 @@ pkgname=skywire-bin
 _pkgname=${pkgname/-bin/}
 _githuborg=skycoin
 pkgdesc="Skywire: Building a new Internet. Skycoin.com"
-pkgver='1.3.59'
+pkgver='1.3.60'
 pkgrel='1'
 _rc=''
 #_rc='-pr1'
@@ -69,14 +69,14 @@ sha256sums=('40c80ccce9e89ae559050b943be1f09d905476c614a72d74fac2a58c821ac058'
             '483353f172cb12c8d726dce8e0cd284ff6bf6a69b2912274559bc199b1c7f3e3'
             '60cd97d7ff821f793de68f38aad4468fc83fcddf31449397227d16a746cc8a92'
             '2f1511abbd2b42f4bfebf2a872295de5992fe98d81163ac9ab7744d61608af5e')
-sha256sums_i686=('6e45abbeeb4a3a6b36f8a766b2ece7236475341312e1075f53f22c5025c8f9ff')
-sha256sums_x86_64=('678208ab535eb7d58ea9ae736f50d43d6628195f9bef096d91927470ec780190')
-sha256sums_aarch64=('3e07e71b4de83a9663ff1b584f889af7fd9a4e3e8ee6a952c7a01da393c80f72')
-sha256sums_armv8=('3e07e71b4de83a9663ff1b584f889af7fd9a4e3e8ee6a952c7a01da393c80f72')
-sha256sums_armv7=('bb20573744e15eb946549962c8ae66260fd776d5c6720479f17affbbfa0770ee')
-sha256sums_armv7l=('bb20573744e15eb946549962c8ae66260fd776d5c6720479f17affbbfa0770ee')
-sha256sums_armv7h=('bb20573744e15eb946549962c8ae66260fd776d5c6720479f17affbbfa0770ee')
-sha256sums_arm=('6919ca364c808f4db09275dd800200ad5c8fdc861fbfa5494b0d51cbacf59137')
+sha256sums_i686=('5d5d745717e9632c54d9f47fd363f29bb439de69883aac9359a1622fa969c758')
+sha256sums_x86_64=('a0d2bd600c875e393ac8ceb411c694c447fcba98522a6db7adbf73e163a5bac7')
+sha256sums_aarch64=('b3ada26b6ffeff80b979ca86f8cbdfce1fe1b26cfa4e4dace38574f2a00e26bc')
+sha256sums_armv8=('b3ada26b6ffeff80b979ca86f8cbdfce1fe1b26cfa4e4dace38574f2a00e26bc')
+sha256sums_armv7=('02b5e728918cfa0d63974b78dad6efaf40e207d9b05f18581f113df151ee9c41')
+sha256sums_armv7l=('02b5e728918cfa0d63974b78dad6efaf40e207d9b05f18581f113df151ee9c41')
+sha256sums_armv7h=('02b5e728918cfa0d63974b78dad6efaf40e207d9b05f18581f113df151ee9c41')
+sha256sums_arm=('1dcd284d92f8aef1b066448be05c55d7aec1f7cb5adc778d2baf0e47923579e7')
 #https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-amd64.tar.gz
 #https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-arm64.tar.gz
 #https://github.com/skycoin/skywire/releases/download/v1.3.32/skywire-v1.3.32-linux-armhf.tar.gz
