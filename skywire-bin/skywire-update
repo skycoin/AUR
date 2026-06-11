@@ -207,3 +207,26 @@ if systemctl is-active --quiet skywire 2>/dev/null; then
     echo "Restarting skywire service..."
     systemctl restart skywire
 fi
+
+# Restart operator-configured dependent services (RESTART_SERVICES in
+# /etc/skywire.conf) — standalone systemd units that link against or
+# depend on the skywire binary (e.g. a separate dmsgweb SOCKS5 proxy).
+# Reached ONLY when a new binary was actually installed: the no-op
+# early-exits above (proxy-version match, post-build NEW==CURRENT) mean
+# this never fires on a daily no-op tick, and it's not part of autoconfig
+# so a bare `skywire autoconfig` never restarts them either. Each unit is
+# restarted only if currently active (inactive/unknown units are skipped);
+# a failed restart is logged but does not fail the update. Independent of
+# the skywire-service gate above, so it works when the visor is supervised
+# outside systemd but the dependent service is a systemd unit.
+if [ "${#RESTART_SERVICES[@]}" -gt 0 ] 2>/dev/null; then
+    for _svc in "${RESTART_SERVICES[@]}"; do
+        [ -z "$_svc" ] && continue
+        if systemctl is-active --quiet "$_svc" 2>/dev/null; then
+            echo "Restarting dependent service: $_svc"
+            systemctl restart "$_svc" 2>/dev/null || echo "  warning: failed to restart $_svc"
+        else
+            echo "Skipping $_svc (not active or not installed)"
+        fi
+    done
+fi
