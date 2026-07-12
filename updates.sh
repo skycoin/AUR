@@ -66,8 +66,39 @@ source PKGBUILD
 echo "Result: pkgver=${pkgver} pkgrel=${pkgrel} _rc=${_rc}"
 echo "Arch version: ${pkgver}-${pkgrel}"
 echo "GitHub tag: ${_tag_ver}"
+
+# Prune stale release archives. updpkgsums downloads the current version's
+# per-arch tarballs (~85MB each × 6 arches) but never removes prior versions,
+# so they pile up (this dir hit 2.4GB / 30 archives before this was added).
+# Keep ONLY the current pkgver's archives — deletes trigger on a pkgver bump;
+# a pkgrel-only bump keeps the same pkgver's tarballs untouched. Tarballs are
+# gitignored build byproducts, so this never touches tracked files.
+echo
+echo "Pruning old release archives (keeping v${pkgver}${_rc})..."
+for _f in skywire-v*.tar.gz; do
+	[[ -e $_f ]] || continue
+	case "$_f" in
+		skywire-v${pkgver}${_rc}-*) : ;; # current version — keep
+		*) echo "  rm $_f"; rm -f "$_f" ;;
+	esac
+done
+
 echo
 echo "git add -f " *PKGBUILD " .SRCINFO skywire-autoconfig skywire-update skywire-docker-update " *.desktop *.png *.service *.timer *.sh *.conf *.install
 echo 'git commit -m " "'
 echo "aurpublish ${pkgname}"
 echo "git push"
+
+# Non-blocking: mirror the current archives into the yay build cache and prune
+# old ones there too, so `yay -S skywire-bin` reuses them instead of
+# re-downloading. Guarded + `|| true` so it can NEVER fail the AUR update
+# (run it last, effectively after the manual aurpublish/git push above).
+_yaydir="$HOME/.cache/yay/skywire-bin"
+if [[ -d $_yaydir ]]; then
+	{
+		cp -f skywire-v${pkgver}${_rc}-*.tar.gz "$_yaydir"/ 2>/dev/null
+		find "$_yaydir" -maxdepth 1 -name 'skywire-v*.tar.gz' \
+			! -name "skywire-v${pkgver}${_rc}-*.tar.gz" -delete 2>/dev/null
+		echo "Synced current archives into $_yaydir (old ones pruned)."
+	} || true
+fi
