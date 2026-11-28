@@ -173,6 +173,8 @@ install_wasm_module() {
         echo "warning: no skywire.wasm.json at ${_base}; module left as is"
         return 0
     fi
+    ( cd "$_BIN_TMPDIR" && grep -E '[[:space:]]\*?skywire\.wasm\.json$' SHA256SUMS | sha256sum -c - ) >/dev/null 2>&1 \
+        || fail "skywire.wasm.json does not match SHA256SUMS — refusing the module"
     _want=$(grep -oE '"sha256":"[0-9a-f]{64}"' "${_BIN_TMPDIR}/skywire.wasm.json" | grep -oE '[0-9a-f]{64}' || true)
     if [ -z "$_want" ]; then
         echo "warning: unreadable skywire.wasm.json at ${_base}; module left as is"
@@ -190,6 +192,29 @@ install_wasm_module() {
     install -Dm644 "${_BIN_TMPDIR}/skywire.wasm.gz" "${_dir}/skywire.wasm.gz"
     install -Dm644 "${_BIN_TMPDIR}/skywire.wasm.json" "${_dir}/skywire.wasm.json"
     echo "Installed the js/wasm module ${_want:0:12}"
+}
+
+# verify_sums downloads SHA256SUMS and its signature from $1 into
+# $_BIN_TMPDIR and checks the signature with the installed skywire. A skywire
+# that predates `cli release verify` only gets the checksum check, with a
+# warning; one that has it refuses a missing or bad signature.
+verify_sums() {
+    local _base="$1" _signer
+    _step="download SHA256SUMS"
+    curl -fsSL --retry 3 --retry-delay 2 --connect-timeout 20 --max-time 300 \
+        -o "${_BIN_TMPDIR}/SHA256SUMS" "${_base}/SHA256SUMS" \
+        || fail "download of SHA256SUMS from ${_base} failed (network down, or the release not published?)"
+    _step="signature verification"
+    if ! skywire cli release verify --help >/dev/null 2>&1; then
+        echo "warning: the installed skywire cannot verify release signatures; checking checksums only"
+        return 0
+    fi
+    curl -fsSL --retry 3 --retry-delay 2 --connect-timeout 20 --max-time 60 \
+        -o "${_BIN_TMPDIR}/SHA256SUMS.sig" "${_base}/SHA256SUMS.sig" \
+        || fail "no SHA256SUMS.sig at ${_base} — refusing an unsigned release"
+    _signer=$(skywire cli release verify "${_BIN_TMPDIR}/SHA256SUMS" 2>&1) \
+        || fail "SHA256SUMS signature check failed (${_signer}) — refusing to install"
+    echo "SHA256SUMS signed by ${_signer}"
 }
 
 install_binary() {
@@ -216,6 +241,8 @@ install_binary() {
 
     _BIN_TMPDIR=$(mktemp -d)
     trap 'rm -rf "$_BIN_TMPDIR"' EXIT  # clean the download dir on any exit
+
+    verify_sums "$_base"
 
     # Before the commit gate: the module moves on its own schedule.
     if [ "$WASM_MODULE_UPDATE" = true ]; then
@@ -252,11 +279,7 @@ install_binary() {
         exit 0
     fi
 
-    _step="download SHA256SUMS"
     echo "Fetching prebuilt skywire ($_arch) from ${_tag} ..."
-    curl -fsSL --retry 3 --retry-delay 2 --connect-timeout 20 --max-time 300 \
-        -o "${_BIN_TMPDIR}/SHA256SUMS" "${_base}/SHA256SUMS" \
-        || fail "download of SHA256SUMS from ${_base} failed (network down, or tag ${_tag} not published?)"
 
     _step="download ${_asset}"
     curl -fsSL --retry 3 --retry-delay 2 --connect-timeout 20 --max-time 300 \
